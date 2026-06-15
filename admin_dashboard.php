@@ -6,7 +6,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,15 +58,17 @@ header nav a:hover { text-decoration: underline; }
 }
 .card h3 { margin-top: 0; color: #007bff; }
 .card p { color: #555; }
-button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.card a.button {
+    display:inline-block;
+    padding:10px 15px;
+    background:#007bff;
+    color:white;
+    border-radius:5px;
+    text-decoration:none;
+    margin-top:10px;
+    text-align:center;
 }
-button:hover { background-color: #0056b3; }
+.card a.button:hover { background-color:#0056b3; }
 .logout {
     margin-top: 20px;
     display: inline-block;
@@ -82,42 +84,42 @@ button:hover { background-color: #0056b3; }
     <h1>BusGo Admin</h1>
     <nav>
         <a href="#">Dashboard</a>
-        <a href="#">Manage Buses</a>
-        <a href="#">Manage Routes</a>
-        <a href="#">Manage Schedules</a>
-        <a href="#">View Bookings</a>
+        <a href="admin_manage_buses.php">Manage Buses</a>
+        <a href="admin_manage_routes.php">Manage Routes</a>
+        <a href="admin_manage_schedules.php">Manage Schedules</a>
+        <a href="admin_view_bookings.php">View Bookings</a>
         <a href="logout.php">Logout</a>
     </nav>
 </header>
 
 <div class="container">
-    <div class="welcome">Welcome Admin, John Doe!</div>
+    <div class="welcome">Welcome Admin, <?php echo htmlspecialchars($_SESSION['username']); ?>!</div>
 
     <div class="dashboard-grid">
         <div class="card">
             <h3>Manage Buses</h3>
             <p>Add, update or remove buses from the system.</p>
-            <button>Go</button>
+            <a href="admin_manage_buses.php" class="button">Go</a>
         </div>
         <div class="card">
             <h3>Manage Routes</h3>
             <p>Create and edit bus routes.</p>
-            <button>Go</button>
+            <a href="admin_manage_routes.php" class="button">Go</a>
         </div>
         <div class="card">
             <h3>Manage Schedules</h3>
             <p>Set and update bus schedules.</p>
-            <button>Go</button>
+            <a href="admin_manage_schedules.php" class="button">Go</a>
         </div>
         <div class="card">
             <h3>View Bookings</h3>
             <p>See all user bookings and ticket details.</p>
-            <button>Go</button>
+            <a href="admin_view_bookings.php" class="button">Go</a>
         </div>
         <div class="card">
             <h3>Account Settings</h3>
             <p>Update admin account information.</p>
-            <button>Edit</button>
+            <a href="admin_edit_account.php" class="button">Edit</a>
         </div>
     </div>
 

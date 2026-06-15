@@ -5,9 +5,12 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'user'){
     exit();
 }
 ?>  
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>User Dashboard - OBTMS</title>
 <style>
 body {
@@ -81,8 +84,8 @@ header nav a:hover { text-decoration: underline; }
 <header>
     <h1>BusGo</h1>
     <nav>
-        <a href="#">Search Buses</a>
-        <a href="#">My Bookings</a>
+        <a href="search_buses.php">Search Buses</a>
+        <a href="user_bookings.php">My Bookings</a>
         <a href="#">Account</a>
         <a href="logout.php">Logout</a>
     </nav>
@@ -95,13 +98,13 @@ header nav a:hover { text-decoration: underline; }
         <div class="card">
             <h3>Upcoming Bookings</h3>
             <p>View all your upcoming bus trips.</p>
-            <a href="#" class="button">View Bookings</a>
+            <a href="user_bookings.php" class="button">View Bookings</a>
         </div>
-        <div class="card">
-            <h3>Search & Book</h3>
-            <p>Find buses and book tickets for your next journey.</p>
-            <a href="#" class="button">Search Buses</a>
-        </div>
+     <div class="card">
+    <h3>Search & Book</h3>
+    <p>Find buses and book tickets for your next journey.</p>
+    <a href="search_buses.php" class="button">Search Buses</a>
+</div>
         <div class="card">
             <h3>Account Settings</h3>
             <p>Update your personal information and preferences.</p>
