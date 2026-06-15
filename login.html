@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login - OBTMS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f9fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+        }
+
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #1a2b4c;
+        }
+
+        .toggle-login {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .toggle-login button {
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px 0 0 5px;
+            background: #007bff;
+            color: #fff;
+        }
+
+        .toggle-login button.active {
+            background: #0056b3;
+        }
+
+        .toggle-login button:last-child {
+            border-radius: 0 5px 5px 0;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button.login-btn {
+            padding: 10px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button.login-btn:hover {
+            background: #0056b3;
+        }
+
+        #error-msg {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <div class="toggle-login">
+            <button type="button" class="active" id="userBtn">User</button>
+            <button type="button" id="adminBtn">Admin</button>
+        </div>
+
+        <form id="loginForm" action="login.php" method="POST">
+            <input type="hidden" name="role" id="role" value="user">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+
+        <div style="text-align:center; margin-top:20px;">
+            <span>Not registered yet? </span>
+            <a href="register.html" style="padding:8px 15px; background:#007bff; color:#fff; border-radius:5px; text-decoration:none;">Register</a>
+        </div>
+
+        <p id="error-msg">
+        <?php if(isset($_GET['error'])) { echo htmlspecialchars($_GET['error']); } ?>
+        </p>
+    </div>
+
+    <script>
+        const userBtn = document.getElementById('userBtn');
+        const adminBtn = document.getElementById('adminBtn');
+        const roleInput = document.getElementById('role');
+
+        userBtn.addEventListener('click', () => {
+            roleInput.value = 'user';
+            userBtn.classList.add('active');
+            adminBtn.classList.remove('active');
+        });
+
+        adminBtn.addEventListener('click', () => {
+            roleInput.value = 'admin';
+            adminBtn.classList.add('active');
+            userBtn.classList.remove('active');
+        });
+    </script>
+
+</body>
+
+</html>

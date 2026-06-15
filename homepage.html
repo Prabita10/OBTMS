@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BusGo - Online Bus Ticket Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: #f7f9fc;
+        }
+
+        header {
+            background-color: #1a2b4c;
+            color: #fff;
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        nav a.btn-login {
+            border: 1px solid #fff;
+        }
+
+        nav a.btn-register {
+            background-color: #007bff;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+            opacity: 0.9;
+        }
+
+        .hero {
+            background: url('busbackgroundimage.webp') no-repeat center center/cover;
+            height: 550px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero h2 {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .search-panel {
+            background-color: #fff;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .search-panel input,
+        .search-panel select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .search-panel button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .features {
+            display: flex;
+            justify-content: space-around;
+            margin: 50px 20px;
+            flex-wrap: wrap;
+        }
+
+        .feature {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 200px;
+            text-align: center;
+            margin: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature h3 {
+            margin-bottom: 10px;
+            color: #007bff;
+        }
+
+        .popular-routes {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        .popular-routes h3 {
+            margin-bottom: 20px;
+            color: #1a2b4c;
+        }
+
+        .routes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .route-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 220px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .route-card p {
+            color: #555;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            background-color: #1a2b4c;
+            color: #fff;
+            margin-top: 50px;
+        }
+
+        @media(max-width: 768px) {
+            .search-panel {
+                flex-direction: column;
+            }
+
+            .search-panel input,
+            .search-panel select,
+            .search-panel button {
+                margin: 5px 0;
+            }
+
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .routes {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>BusGo</h1>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Search Buses</a>
+            <a href="#">Routes</a>
+            <a href="#">Schedules</a>
+            <a href="#">My Bookings</a>
+            <a href="#">Contact Us</a>
+            <a href="login.html" class="btn btn-login">Login</a>
+            <a href="register.html" class="btn btn-register">Register</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h2>Your Journey, Our Priority</h2>
+        <p>Search, Book and Travel with comfort. Trusted by thousands of travelers every day.</p>
+        <div class="search-panel">
+            <input type="text" placeholder="From">
+            <input type="text" placeholder="To">
+            <input type="date" placeholder="Date of Journey">
+            <select>
+                <option>1 Passenger</option>
+                <option>2 Passengers</option>
+                <option>3 Passengers</option>
+                <option>4 Passengers</option>
+            </select>
+            <a href="login.html"><button>Search Buses</button></a>
+
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature">
+            <h3>Easy Booking</h3>
+            <p>Book your tickets in just a few steps.</p>
+        </div>
+        <div class="feature">
+            <h3>Secure Payment</h3>
+            <p>Your payments are safe and encrypted.</p>
+        </div>
+        <div class="feature">
+            <h3>Instant Confirmation</h3>
+            <p>Get instant booking confirmation.</p>
+        </div>
+        <div class="feature">
+            <h3>24/7 Support</h3>
+            <p>We’re here to help you anytime, anywhere.</p>
+        </div>
+    </section>
+
+    <section class="popular-routes">
+        <h3>Popular Routes</h3>
+        <div class="routes">
+            <div class="route-card">
+                <h4>Kathmandu → Pokhara</h4>
+                <p>120+ Buses | From NPR 800</p>
+            </div>
+            <div class="route-card">
+                <h4>Kathmandu → Chitwan</h4>
+                <p>80+ Buses | From NPR 700</p>
+            </div>
+            <div class="route-card">
+                <h4>Pokhara → Butwal</h4>
+                <p>60+ Buses | From NPR 900</p>
+            </div>
+            <div class="route-card">
+                <h4>Kathmandu → Biratnagar</h4>
+                <p>90+ Buses | From NPR 1100</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2026 BusGo. All rights reserved by Prabita Adhikari.
+    </footer>
+</body>
+
+</html>

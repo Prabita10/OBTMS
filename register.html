@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration - OBTMS</title>
+    <link rel="stylesheet" href="register.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2>User Registration</h2>
+        <form id="registerForm" action="register.php" method="POST">
+            <label for="fullname">Full Name</label>
+            <input type="text" name="fullname" id="fullname" required>
+
+            <label for="email">Email Address</label>
+            <input type="email" name="email" id="email" required>
+
+            <label for="phone">Phone Number</label>
+            <input type="text" name="phone" id="phone" required placeholder="10 digits starting with 9">
+
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" required>
+
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" required
+                placeholder="Min 5 chars, 1 capital, 1 digit, 1 special">
+
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" name="confirm_password" id="confirm_password" required>
+
+            <button type="submit">Register</button>
+        </form>
+        <p id="error-msg" style="color:red;"></p>
+        <div style="text-align:center; margin-top:20px;">
+            <span>Already registered? </span>
+            <a href="login.html" style="padding:8px 15px; background:#007bff; color:#fff; border-radius:5px; text-decoration:none;">Login</a>
+        </div>
+    </div>
+
+    <script src="register.js"></script>
+</body>
+
+</html>
