@@ -1,6 +1,6 @@
 <?php
 session_start();
-if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
+if (!isset($_SESSION['username']) || $_SESSION['role'] != 'admin') {
     header("Location: login.html");
     exit();
 }
@@ -22,59 +22,141 @@ $result = $conn->query($sql);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Manage Routes - OBTMS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body { font-family: Arial, sans-serif; background:#f7f9fc; margin:0; padding:20px; }
-h2 { color:#1a2b4c; text-align:center; margin-bottom:20px; }
-table { border-collapse: collapse; width: 100%; background:#fff; border-radius:10px; overflow:hidden; }
-th, td { border:1px solid #ccc; padding:12px; text-align:left; }
-th { background:#1a2b4c; color:white; }
-a.button {
-    padding: 8px 12px;
-    background: #007bff;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 5px;
-    display:inline-block;
-}
-a.button:hover { background:#0056b3; }
-.add-btn { margin-bottom:15px; display:inline-block; }
-</style>
+    <meta charset="UTF-8">
+    <title>Manage Routes - OBTMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f9fc;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #1a2b4c;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+
+        header nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        h2 {
+            color: #1a2b4c;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #1a2b4c;
+            color: white;
+        }
+
+        a.button {
+            padding: 8px 12px;
+            background: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        a.button:hover {
+            background: #0056b3;
+        }
+
+        .add-btn {
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+    </style>
 </head>
+
 <body>
 
-<h2>Manage Routes</h2>
+    <header>
+        <h1>BusGo</h1>
+        <nav>
+            <a href="admin_dashboard.php">Dashboard</a>
+            <a href="logout.php">Logout</a>
+        </nav>
+    </header>
 
-<a href="add_route.php" class="button add-btn">Add New Route</a>
+    <div class="container">
+        <h2>Manage Routes</h2>
 
-<table>
-    <tr>
-        <th>ID</th>
-        <th>Source</th>
-        <th>Destination</th>
-        <th>Stops</th>
-        <th>Actions</th>
-    </tr>
-    <?php if ($result->num_rows > 0): ?>
-        <?php while($row = $result->fetch_assoc()): ?>
-        <tr>
-            <td><?php echo $row['route_id']; ?></td>
-            <td><?php echo $row['source']; ?></td>
-            <td><?php echo $row['destination']; ?></td>
-            <td><?php echo $row['stops']; ?></td>
-            <td>
-                <a href="edit_route.php?id=<?php echo $row['route_id']; ?>" class="button">Edit</a>
-                <a href="delete_route.php?id=<?php echo $row['route_id']; ?>" class="button" onclick="return confirm('Are you sure you want to delete this route?');">Delete</a>
-            </td>
-        </tr>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <tr><td colspan="5" style="text-align:center;">No routes found.</td></tr>
-    <?php endif; ?>
-</table>
+        <a href="add_route.php" class="button add-btn">Add New Route</a>
+
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th>Stops</th>
+                <th>Actions</th>
+            </tr>
+            <?php if ($result->num_rows > 0): ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo $row['route_id']; ?></td>
+                        <td><?php echo $row['source']; ?></td>
+                        <td><?php echo $row['destination']; ?></td>
+                        <td><?php echo $row['stops']; ?></td>
+                        <td>
+                            <a href="edit_route.php?id=<?php echo $row['route_id']; ?>" class="button">Edit</a>
+                            <a href="delete_route.php?id=<?php echo $row['route_id']; ?>" class="button"
+                                onclick="return confirm('Are you sure you want to delete this route?');">Delete</a>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="5" style="text-align:center;">No routes found.</td>
+                </tr>
+            <?php endif; ?>
+        </table>
+    </div>
 
 </body>
+
 </html>

@@ -6,7 +6,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -83,11 +83,7 @@ header nav a:hover { text-decoration: underline; }
 <header>
     <h1>BusGo Admin</h1>
     <nav>
-        <a href="#">Dashboard</a>
-        <a href="admin_manage_buses.php">Manage Buses</a>
-        <a href="admin_manage_routes.php">Manage Routes</a>
-        <a href="admin_manage_schedules.php">Manage Schedules</a>
-        <a href="admin_view_bookings.php">View Bookings</a>
+
         <a href="logout.php">Logout</a>
     </nav>
 </header>
@@ -123,7 +119,7 @@ header nav a:hover { text-decoration: underline; }
         </div>
     </div>
 
-    <a class="logout" href="logout.php"><button>Logout</button></a>
+    <a class="logout" href="logout.php"></a>
 </div>
 
 </body>
