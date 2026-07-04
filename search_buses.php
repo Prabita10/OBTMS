@@ -21,10 +21,9 @@ if (isset($_GET['search'])) {
     $to = $_GET['to'];
     $date = $_GET['date']; // YYYY-MM-DD format
 
-    $sql = "SELECT s.schedule_id, b.bus_name, b.type, b.fare, s.departure_time, s.arrival_time, s.available_seats, b.total_seats,
-                   r.source, r.destination
+    $sql = "SELECT s.schedule_id, b.bus_name, b.type, b.fare, s.departure_time, s.arrival_time, s.available_seats, b.total_seats,r.source, r.destination
             FROM schedules s
-            JOIN buses b ON s.bus_id=b.bus_id
+            JOIN buses b ON s.bus_id = b.bus_id
             JOIN routes r ON s.route_id=r.route_id
             WHERE r.source='$from' AND r.destination='$to'
               AND DATE(s.departure_time)='$date'

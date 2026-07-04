@@ -188,12 +188,12 @@ $conn->close();
             var totalPrice = <?php echo $totalPrice; ?>;
             doc.text("Total Price: NPR " + totalPrice, 20, doc.lastAutoTable.finalY + 10);
             // Save PDF
-doc.save('busgo_ticket.pdf');
+            doc.save('busgo_ticket.pdf');
 
-// Redirect to dashboard after download
-setTimeout(function () {
-    window.location.href = "user_dashboard.php";
-}, 1000);
+            // Redirect to dashboard after download
+            setTimeout(function () {
+                window.location.href = "user_dashboard.php";
+            }, 1000);
 
 
         }
