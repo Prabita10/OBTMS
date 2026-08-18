@@ -61,7 +61,8 @@ if (isset($_POST['update'])) {
             <?php while ($b = $buses->fetch_assoc()): ?>
                 <option value="<?php echo $b['bus_id']; ?>" <?php if ($b['bus_id'] == $schedule['bus_id'])
                        echo 'selected'; ?>>
-                    <?php echo $b['bus_name']; ?></option>
+                    <?php echo $b['bus_name']; ?>
+                </option>
             <?php endwhile; ?>
         </select><br>
 

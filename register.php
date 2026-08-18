@@ -18,8 +18,8 @@ $username = $_POST['username'];
 // $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hash the password
 $password =$_POST['password'];
 
-// Insert into info table
-$sql = "INSERT INTO info (fullname, email, phone, username, password)
+// Insert into user table
+$sql = "INSERT INTO user (fullname, email, phone, username, password)
         VALUES ('$fullname', '$email', '$phone', '$username', '$password')";
 
 if ($conn->query($sql) === TRUE) {

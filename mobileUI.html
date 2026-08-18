@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BusGo Mobile - Coming Soon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+
+        body {
+            background: linear-gradient(135deg, #1a2b4c 0%, #2a4a7a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+
+        .main-container {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            max-width: 900px;
+            width: 100%;
+            justify-content: center;
+        }
+
+
+        /* ===== COMING SOON TEXT (LEFT SIDE) ===== */
+        .coming-soon-text {
+            color: #fff;
+            max-width: 300px;
+        }
+
+
+        .coming-soon-text .badge {
+            background: #ffc107;
+            color: #1a2b4c;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+
+        .coming-soon-text h1 {
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+
+        .coming-soon-text h1 span {
+            color: #57e231;
+        }
+
+
+        .coming-soon-text p {
+            font-size: 16px;
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+
+        .coming-soon-text .features-list {
+            list-style: none;
+            padding: 0;
+        }
+
+
+        .coming-soon-text .features-list li {
+            padding: 6px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+
+        .coming-soon-text .features-list li i {
+            color: #57e231;
+            margin-right: 10px;
+            width: 20px;
+        }
+
+
+        /* ===== PHONE FRAME (RIGHT SIDE) ===== */
+        .phone-wrapper {
+            flex-shrink: 0;
+        }
+
+
+        .phone-frame {
+            background: #1a1a2e;
+            border-radius: 40px;
+            padding: 14px;
+            width: 320px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+            position: relative;
+        }
+
+
+        .phone-screen {
+            background: #f7f9fc;
+            border-radius: 28px;
+            padding: 16px 14px 14px;
+            height: 520px;
+            overflow: hidden;
+            position: relative;
+        }
+
+
+        /* Notch */
+        .notch {
+            background: #1a1a2e;
+            width: 120px;
+            height: 26px;
+            border-radius: 16px;
+            margin: -20px auto 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 2;
+        }
+        .notch .camera {
+            width: 8px;
+            height: 8px;
+            background: #2d2d44;
+            border-radius: 50%;
+            border: 1px solid #3a3a55;
+        }
+        .notch .speaker {
+            width: 35px;
+            height: 4px;
+            background: #2d2d44;
+            border-radius: 10px;
+        }
+
+
+        /* Phone Header */
+        .phone-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .phone-header h2 {
+            font-size: 18px;
+            color: #1a2b4c;
+            font-weight: 700;
+        }
+        .phone-header h2 span {
+            color: #57e231;
+        }
+        .phone-header .close-icon {
+            color: #1a2b4c;
+            font-size: 18px;
+            text-decoration: none;
+            padding: 2px 6px;
+            border-radius: 50%;
+        }
+        .phone-header .close-icon:hover {
+            background: #e0e4ed;
+        }
+
+
+        /* Slider */
+        .slider-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 14px;
+            height: 390px;
+        }
+
+
+        .slider-wrapper {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 100%;
+        }
+
+
+        .slide {
+            min-width: 100%;
+            padding: 10px 8px 12px;
+            background: #f7f9fc;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+
+        /* Hide scrollbar */
+        .slide::-webkit-scrollbar {
+            width: 3px;
+        }
+        .slide::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+
+
+        /* ===== SLIDE 1: HOME ===== */
+        .slide-home .hero-mini {
+            background: linear-gradient(rgba(26, 43, 76, 0.85), rgba(26, 43, 76, 0.85));
+            border-radius: 12px;
+            padding: 14px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .slide-home .hero-mini h4 { font-size: 15px; }
+        .slide-home .hero-mini p { font-size: 11px; opacity: 0.8; }
+        .slide-home .mini-search {
+            display: flex;
+            gap: 4px;
+            background: white;
+            border-radius: 20px;
+            padding: 4px 8px;
+            margin-top: 8px;
+        }
+        .slide-home .mini-search input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 10px;
+            outline: none;
+        }
+        .slide-home .mini-search button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 3px 12px;
+            border-radius: 16px;
+            font-size: 9px;
+            cursor: pointer;
+        }
+
+
+        .mini-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+        .mini-features .f {
+            background: white;
+            border-radius: 8px;
+            padding: 6px 4px;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .mini-features .f i { color: #007bff; font-size: 14px; }
+        .mini-features .f p { font-size: 9px; color: #555; }
+
+
+        .mini-bus-card {
+            background: white;
+            border-radius: 10px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid #007bff;
+        }
+        .mini-bus-card .route-text { font-size: 12px; font-weight: 600; color: #1a2b4c; }
+        .mini-bus-card .time-text { font-size: 9px; color: #888; }
+        .mini-bus-card .price-text { color: #007bff; font-weight: 700; font-size: 13px; }
+
+
+        /* ===== SLIDE 2: USER DASHBOARD ===== */
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .user-mini .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+        }
+        .user-mini .info h4 { font-size: 14px; color: #1a2b4c; }
+        .user-mini .info p { font-size: 10px; color: #888; }
+
+
+        .stats-mini {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .stats-mini .s {
+            background: white;
+            border-radius: 8px;
+            padding: 8px 4px;
+            text-align: center;
+        }
+        .stats-mini .s .num { font-size: 16px; font-weight: 700; color: #1a2b4c; }
+        .stats-mini .s .label { font-size: 8px; color: #888; }
+
+
+        .booking-mini {
+            background: white;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid #28a745;
+        }
+        .booking-mini .route { font-size: 12px; font-weight: 600; color: #1a2b4c; }
+        .booking-mini .date { font-size: 9px; color: #888; }
+        .booking-mini .status-badge {
+            font-size: 9px;
+            padding: 2px 10px;
+            border-radius: 10px;
+            background: #28a745;
+            color: #fff;
+        }
+
+
+        /* ===== SLIDE 3: ADMIN ===== */
+        .admin-header-mini {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .admin-header-mini h4 { font-size: 14px; color: #1a2b4c; }
+        .admin-header-mini span { font-size: 10px; color: #888; }
+
+
+        .admin-stats-mini {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .admin-stats-mini .as {
+            background: white;
+            border-radius: 8px;
+            padding: 8px 4px;
+            text-align: center;
+        }
+        .admin-stats-mini .as .num { font-size: 16px; font-weight: 700; color: #1a2b4c; }
+        .admin-stats-mini .as .label { font-size: 8px; color: #888; }
+        .admin-stats-mini .as i { color: #007bff; font-size: 16px; }
+
+
+        .admin-menu-mini {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px;
+        }
+        .admin-menu-mini .am {
+            background: white;
+            border-radius: 8px;
+            padding: 8px 4px;
+            text-align: center;
+        }
+        .admin-menu-mini .am i { font-size: 16px; color: #007bff; }
+        .admin-menu-mini .am p { font-size: 8px; color: #555; }
+
+
+        /* ===== SLIDE 4: REGISTER ===== */
+        .register-mini {
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+        }
+        .register-mini h4 {
+            text-align: center;
+            color: #1a2b4c;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .register-mini .field {
+            margin-bottom: 6px;
+        }
+        .register-mini .field label {
+            font-size: 9px;
+            color: #888;
+            display: block;
+        }
+        .register-mini .field input {
+            width: 100%;
+            padding: 5px 10px;
+            border: 1px solid #dee3ed;
+            border-radius: 6px;
+            font-size: 11px;
+            outline: none;
+        }
+        .register-mini .field input:focus {
+            border-color: #007bff;
+        }
+        .register-mini .reg-btn {
+            width: 100%;
+            padding: 8px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+        .register-mini .login-link {
+            text-align: center;
+            font-size: 10px;
+            color: #888;
+            margin-top: 6px;
+        }
+        .register-mini .login-link a { color: #007bff; text-decoration: none; }
+
+
+        /* ===== CONTROLS ===== */
+        .slider-controls {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .slider-controls button {
+            background: none;
+            border: none;
+            font-size: 14px;
+            color: #1a2b4c;
+            cursor: pointer;
+            padding: 2px 10px;
+            border-radius: 16px;
+            transition: 0.2s;
+        }
+        .slider-controls button:hover {
+            background: #e0e4ed;
+        }
+
+
+        .dots-mini {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 6px;
+        }
+        .dots-mini .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            border: none;
+            transition: 0.3s;
+        }
+        .dots-mini .dot.active {
+            background: #007bff;
+            width: 22px;
+            border-radius: 6px;
+        }
+
+
+        .phone-label {
+            text-align: center;
+            font-size: 9px;
+            color: #999;
+            margin-top: 6px;
+        }
+
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                gap: 25px;
+                padding: 10px;
+            }
+
+
+            .coming-soon-text {
+                text-align: center;
+                max-width: 100%;
+            }
+
+
+            .coming-soon-text h1 {
+                font-size: 28px;
+            }
+
+
+            .coming-soon-text .features-list {
+                display: inline-block;
+                text-align: left;
+            }
+
+
+            .phone-frame {
+                width: 280px;
+            }
+
+
+            .phone-screen {
+                height: 460px;
+                padding: 14px 12px 12px;
+            }
+
+
+            .slider-container {
+                height: 340px;
+            }
+        }
+
+
+        @media (max-width: 400px) {
+            .phone-frame {
+                width: 250px;
+                padding: 10px;
+                border-radius: 30px;
+            }
+            .phone-screen {
+                height: 420px;
+                padding: 12px 10px 10px;
+                border-radius: 20px;
+            }
+            .slider-container {
+                height: 310px;
+            }
+            .coming-soon-text h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="main-container">
+
+
+    <!-- ===== LEFT SIDE: COMING SOON TEXT ===== -->
+    <div class="coming-soon-text">
+        <div class="badge"><i class="fas fa-clock"></i> Coming Soon</div>
+        <h1>Bus<span>Go</span> Mobile App</h1>
+        <p>We're building the best bus booking experience for your phone. Stay tuned for the official release!</p>
+        <ul class="features-list">
+            <li><i class="fas fa-check-circle"></i> Easy Bus Search & Booking</li>
+            <li><i class="fas fa-check-circle"></i> Real-time Seat Availability</li>
+            <li><i class="fas fa-check-circle"></i> Digital E-Tickets</li>
+            <li><i class="fas fa-check-circle"></i> Live Bus Tracking</li>
+        </ul>
+    </div>
+
+
+    <!-- ===== RIGHT SIDE: PHONE ===== -->
+    <div class="phone-wrapper">
+        <div class="phone-frame">
+            <div class="phone-screen">
+
+
+                <!-- Notch -->
+                <div class="notch">
+                    <div class="camera"></div>
+                    <div class="speaker"></div>
+                </div>
+
+
+                <!-- Phone Header -->
+                <div class="phone-header">
+                    <h2>Bus<span>Go</span></h2>
+                    <a href="homepage.html" class="close-icon"><i class="fas fa-times"></i></a>
+                </div>
+
+
+                <!-- Slider -->
+                <div class="slider-container">
+                    <div class="slider-wrapper" id="sliderWrapper">
+
+
+                        <!-- SLIDE 1: HOME -->
+                        <div class="slide slide-home">
+                            <div class="hero-mini">
+                                <h4>Your Journey, Our Priority</h4>
+                                <p>Search & Book with comfort</p>
+                                <div class="mini-search">
+                                    <input type="text" placeholder="From" value="Kathmandu">
+                                    <input type="text" placeholder="To" value="Pokhara">
+                                    <button>Search</button>
+                                </div>
+                            </div>
+                            <div class="mini-features">
+                                <div class="f"><i class="fas fa-bus"></i><p>100+ Buses</p></div>
+                                <div class="f"><i class="fas fa-tags"></i><p>Best Prices</p></div>
+                                <div class="f"><i class="fas fa-wifi"></i><p>Free Cancel</p></div>
+                                <div class="f"><i class="fas fa-star"></i><p>5-Star</p></div>
+                            </div>
+                            <div class="mini-bus-card">
+                                <div>
+                                    <div class="route-text">Kathmandu → Pokhara</div>
+                                    <div class="time-text">07:30 AM · AC Seater</div>
+                                </div>
+                                <div class="price-text">NPR 850</div>
+                            </div>
+                        </div>
+
+
+                        <!-- SLIDE 2: USER DASHBOARD -->
+                        <div class="slide slide-dashboard">
+                            <div class="user-mini">
+                                <div class="avatar"><i class="fas fa-user"></i></div>
+                                <div class="info">
+                                    <h4>Prabita Adhikari</h4>
+                                    <p>prabitaadhikari792@gmail.com</p>
+                                </div>
+                            </div>
+                            <div class="stats-mini">
+                                <div class="s"><div class="num">3</div><div class="label">Bookings</div></div>
+                                <div class="s"><div class="num">2</div><div class="label">Upcoming</div></div>
+                                <div class="s"><div class="num">1</div><div class="label">Cancelled</div></div>
+                            </div>
+                            <div style="font-size:11px; font-weight:600; color:#1a2b4c; margin-bottom:6px;">My Bookings</div>
+                            <div class="booking-mini">
+                                <div>
+                                    <div class="route">Kathmandu → Pokhara</div>
+                                    <div class="date">15 Aug 2026 · 07:30 AM</div>
+                                </div>
+                                <div class="status-badge">Confirmed</div>
+                            </div>
+                            <div class="booking-mini" style="border-left-color:#ffc107;">
+                                <div>
+                                    <div class="route">Kathmandu → Chitwan</div>
+                                    <div class="date">20 Aug 2026 · 09:00 AM</div>
+                                </div>
+                                <div class="status-badge" style="background:#ffc107;color:#1a2b4c;">Pending</div>
+                            </div>
+                        </div>
+
+
+                        <!-- SLIDE 3: ADMIN DASHBOARD -->
+                        <div class="slide slide-admin">
+                            <div class="admin-header-mini">
+                                <h4>🛡️ Admin Panel</h4>
+                                <span>Today</span>
+                            </div>
+                            <div class="admin-stats-mini">
+                                <div class="as"><i class="fas fa-users"></i><div class="num">1,248</div><div class="label">Users</div></div>
+                                <div class="as"><i class="fas fa-ticket-alt"></i><div class="num">156</div><div class="label">Bookings</div></div>
+                                <div class="as"><i class="fas fa-bus"></i><div class="num">45</div><div class="label">Buses</div></div>
+                                <div class="as"><i class="fas fa-route"></i><div class="num">12</div><div class="label">Routes</div></div>
+                            </div>
+                            <div style="font-size:11px; font-weight:600; color:#1a2b4c; margin-bottom:6px;">Quick Actions</div>
+                            <div class="admin-menu-mini">
+                                <div class="am"><i class="fas fa-plus-circle"></i><p>Add Bus</p></div>
+                                <div class="am"><i class="fas fa-edit"></i><p>Manage</p></div>
+                                <div class="am"><i class="fas fa-chart-bar"></i><p>Reports</p></div>
+                                <div class="am"><i class="fas fa-users-cog"></i><p>Users</p></div>
+                                <div class="am"><i class="fas fa-calendar-alt"></i><p>Schedules</p></div>
+                                <div class="am"><i class="fas fa-cog"></i><p>Settings</p></div>
+                            </div>
+                        </div>
+
+
+                        <!-- SLIDE 4: REGISTER -->
+                        <div class="slide slide-register">
+                            <div class="register-mini">
+                                <h4>✨ Create Account</h4>
+                                <div class="field">
+                                    <label>Full Name</label>
+                                    <input type="text" placeholder="Enter your name" value="Prabita Adhikari">
+                                </div>
+                                <div class="field">
+                                    <label>Email Address</label>
+                                    <input type="email" placeholder="Enter your email" value="prabitaadhikari792@gmail.com">
+                                </div>
+                                <div class="field">
+                                    <label>Password</label>
+                                    <input type="password" placeholder="Create password" value="••••••••">
+                                </div>
+                                <div class="field">
+                                    <label>Confirm Password</label>
+                                    <input type="password" placeholder="Confirm password" value="••••••••">
+                                </div>
+                                <button class="reg-btn"><i class="fas fa-user-plus"></i> Register</button>
+                                <div class="login-link">
+                                    Already have an account? <a href="#">Login</a>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+                <!-- Dots -->
+                <div class="dots-mini" id="dotsMini">
+                    <button class="dot active" data-index="0"></button>
+                    <button class="dot" data-index="1"></button>
+                    <button class="dot" data-index="2"></button>
+                    <button class="dot" data-index="3"></button>
+                </div>
+
+
+                <!-- Controls -->
+                <div class="slider-controls">
+                    <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+                    <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+
+
+                <div class="phone-label" id="phoneLabel">🏠 Home Page</div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+<script>
+    const sliderWrapper = document.getElementById('sliderWrapper');
+    const dots = document.querySelectorAll('#dotsMini .dot');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const phoneLabel = document.getElementById('phoneLabel');
+
+
+    const slideNames = ['🏠 Home Page', '👤 User Dashboard', '🛡️ Admin Dashboard', '📝 Register Page'];
+    let currentIndex = 0;
+    const totalSlides = 4;
+
+
+    function updateSlider(index) {
+        sliderWrapper.style.transform = `translateX(-${index * 100}%)`;
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === index);
+        });
+        phoneLabel.textContent = slideNames[index];
+        currentIndex = index;
+    }
+
+
+    function nextSlide() {
+        updateSlider((currentIndex + 1) % totalSlides);
+    }
+
+
+    function prevSlide() {
+        updateSlider((currentIndex - 1 + totalSlides) % totalSlides);
+    }
+
+
+    dots.forEach((dot) => {
+        dot.addEventListener('click', function() {
+            updateSlider(parseInt(this.dataset.index));
+        });
+    });
+
+
+    nextBtn.addEventListener('click', nextSlide);
+    prevBtn.addEventListener('click', prevSlide);
+
+
+    // Keyboard
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight') nextSlide();
+        if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+
+    // Auto-slide
+    let autoSlide = setInterval(nextSlide, 5000);
+    const sliderContainer = document.querySelector('.slider-container');
+    sliderContainer.addEventListener('mouseenter', () => clearInterval(autoSlide));
+    sliderContainer.addEventListener('mouseleave', () => {
+        autoSlide = setInterval(nextSlide, 5000);
+    });
+
+
+    // Touch swipe
+    let startX = 0;
+    sliderContainer.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+    });
+    sliderContainer.addEventListener('touchend', (e) => {
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 30) {
+            diff > 0 ? nextSlide() : prevSlide();
+        }
+    });
+</script>
+
+
+</body>
+</html>

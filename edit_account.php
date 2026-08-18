@@ -24,7 +24,7 @@ if ($conn->connect_error) {
 $username = $_SESSION['username'];
 
 // Fetch current user info
-$sql = "SELECT fullname,email,phone FROM info WHERE username='$username'";
+$sql = "SELECT fullname,email,phone FROM user WHERE username='$username'";
 $result = $conn->query($sql);
 $user = $result->fetch_assoc();
 
@@ -35,7 +35,7 @@ if (isset($_POST['update'])) {
     $email = $_POST['email'];
     $phone = $_POST['phone'];
 
-    $update_sql = "UPDATE info SET fullname='$fullname', email='$email', phone='$phone' WHERE username='$username'";
+    $update_sql = "UPDATE user SET fullname='$fullname', email='$email', phone='$phone' WHERE username='$username'";
     if ($conn->query($update_sql) === TRUE) {
         $updated = true;
         $user['fullname'] = $fullname;
