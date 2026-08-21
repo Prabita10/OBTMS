@@ -106,6 +106,53 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
                 flex-direction: column;
             }
         }
+.welcome-box {
+    background: #0056b3;
+    color: #fff;
+    padding: 28px 35px;
+    padding-top: 1px;
+    border-radius: 14px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 15px rgba(26,43,76,0.25);
+    width: 300px;
+    height: 110px;
+}
+.welcome-box h2 {
+    font-size: 24px;
+    font-weight: 600;
+}
+.welcome-box h2 span {
+    color:white;
+}
+.welcome-box p {
+    opacity: 0.85;
+    margin-top: 5px;
+    font-size: 14px;
+}
+.welcome-box .user-badge {
+    background: rgba(255,255,255,0.15);
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+@media (max-width: 768px) {
+    .welcome-box {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+        padding: 22px 20px;
+    }
+    .welcome-box h2 { 
+        font-size: 20px; 
+    }
+}
     </style>
 </head>
 
@@ -119,8 +166,16 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
     </header>
 
     <div class="container">
-        <div class="welcome">Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</div>
-
+        <!-- <div class="welcome">Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</div> -->
+<!-- Welcome Box -->
+<div class="welcome-box">
+    <div>
+        <h2>Welcome back, <span><?php echo htmlspecialchars($_SESSION['username']); ?></span> 👋</h2>
+        <p><i class="fas fa-calendar-alt"></i> <?php echo date('l, F j, Y'); ?> &nbsp;·&nbsp; <i class="fas fa-clock"></i> <?php echo date('h:i A'); ?></p>
+    </div>
+    
+    <div class="user-badge"><i class="fas fa-user-circle"></i> <?php echo ucfirst($_SESSION['role']); ?></div>
+</div>
         <div class="dashboard-grid">
             <div class="card">
                 <h3>View Bookings</h3>

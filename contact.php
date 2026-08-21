@@ -1,3 +1,65 @@
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
+require 'PHPMailer/src/Exception.php';
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
+
+$success = false;
+$error = false;
+$errorMessage = '';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $fullname = isset($_POST['fullname']) ? htmlspecialchars($_POST['fullname']) : '';
+    $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';
+    $phone = isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : '';
+    $subject = isset($_POST['subject']) ? htmlspecialchars($_POST['subject']) : '';
+    $message = isset($_POST['message']) ? htmlspecialchars($_POST['message']) : '';
+
+    if (empty($fullname) || empty($email) || empty($subject) || empty($message)) {
+        $error = true;
+        $errorMessage = 'Please fill in all required fields.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = true;
+        $errorMessage = 'Please enter a valid email address.';
+    } else {
+        $mail = new PHPMailer(true);
+
+        try {
+            // Server settings
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'prabitaadhikari792@gmail.com';     //  GMAIL
+            $mail->Password = 'sshe orxf nxee etgp';        //  GMAIL APP PASSWORD
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+            $mail->SMTPDebug = 0; // Set to 2 for debugging
+
+            // Recipients
+            $mail->setFrom($email, $fullname);
+            $mail->addAddress('prabitaadhikari792@gmail.com', 'BusGo Support');
+            $mail->addReplyTo($email, $fullname);
+
+            // Content
+            $mail->isHTML(false);
+            $mail->Subject = "BusGo Contact Form: " . $subject;
+            $mail->Body = "Name: $fullname\nEmail: $email\nPhone: $phone\nSubject: $subject\n\nMessage:\n$message";
+
+            $mail->send();
+            $success = true;
+        } catch (Exception $e) {
+            $error = true;
+            $errorMessage = "Message could not be sent. Error: {$mail->ErrorInfo}";
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -43,7 +105,7 @@
         }
 
         nav a.btn-login {
-            border: 1px solid #fff;
+            background-color: #007bff;
         }
 
         nav a.btn-register {
@@ -183,6 +245,29 @@
         .contact-form .sub {
             color: #666;
             margin-bottom: 25px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert i {
+            margin-right: 10px;
         }
 
         .form-group {
@@ -378,6 +463,7 @@
     <header>
         <h1>BusGo</h1>
         <nav>
+            <a href="contact.php">Contact Us</a>
             <a href="login.html" class="btn btn-login">Login</a>
             <a href="register.html" class="btn btn-register">Register</a>
         </nav>
@@ -408,7 +494,7 @@
                 <div class="icon"><i class="fas fa-phone-alt"></i></div>
                 <div class="text">
                     <h4>Call Us</h4>
-                    <p><a href="tel:+977-9816109990">+977 9816109990</a><br>Mon - Fri, 9AM - 6PM</p>
+                    <p><a href="tel:+97798016109990">+977 9816109990</a><br>Mon - Fri, 9AM - 6PM</p>
                 </div>
             </div>
 
@@ -432,7 +518,7 @@
             <div class="social-links">
                 <h4>Follow Us</h4>
                 <a href="https://www.facebook.com/profile.php?id=61590781902415"><i class="fab fa-facebook-f"></i></a>
-                <a href="https://www.facebook.com/profile.php?id=61590781902415"><i class="fab fa-instagram"></i></a>
+                
             </div>
         </div>
 
@@ -441,40 +527,58 @@
             <h3>Send Us a Message</h3>
             <p class="sub">We'll get back to you as soon as possible.</p>
 
-            <form id="contactForm" action="#" method="POST">
+            <?php if ($success): ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> ✅ Thank you for reaching out! Our team will get back to you within
+                    24 hours.
+                </div>
+            <?php endif; ?>
+
+            <?php if ($error): ?>
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> <?php echo $errorMessage; ?>
+                </div>
+            <?php endif; ?>
+
+            <form id="contactForm" action="" method="POST">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="fullname">Full Name <span style="color:red;">*</span></label>
-                        <input type="text" id="fullname" name="fullname" placeholder="Prabita" required>
+                        <input type="text" id="fullname" name="fullname" 
+                            value="<?php echo isset($_POST['fullname']) ? htmlspecialchars($_POST['fullname']) : ''; ?>"
+                            required>
                     </div>
                     <div class="form-group">
                         <label for="email">Email Address <span style="color:red;">*</span></label>
-                        <input type="email" id="email" name="email" placeholder="prabita@example.com" required>
+                        <input type="email" id="email" name="email" 
+                            value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>"
+                            required>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" placeholder="+977 9816109990">
+                    <input type="tel" id="phone" name="phone" 
+                        value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="subject">Subject <span style="color:red;">*</span></label>
                     <select id="subject" name="subject" required>
                         <option value="">Select a subject...</option>
-                        <option value="booking">Booking Inquiry</option>
-                        <option value="payment">Payment Issue</option>
-                        <option value="cancellation">Cancellation / Refund</option>
-                        <option value="complaint">Complaint / Feedback</option>
-                        <option value="partnership">Partnership Opportunity</option>
-                        <option value="other">Other</option>
+                        <option value="booking" <?php echo (isset($_POST['subject']) && $_POST['subject'] == 'booking') ? 'selected' : ''; ?>>Booking Inquiry</option>
+                        <option value="payment" <?php echo (isset($_POST['subject']) && $_POST['subject'] == 'payment') ? 'selected' : ''; ?>>Payment Issue</option>
+                        <option value="cancellation" <?php echo (isset($_POST['subject']) && $_POST['subject'] == 'cancellation') ? 'selected' : ''; ?>>Cancellation / Refund</option>
+                        <option value="complaint" <?php echo (isset($_POST['subject']) && $_POST['subject'] == 'complaint') ? 'selected' : ''; ?>>Complaint / Feedback</option>
+                        <option value="partnership" <?php echo (isset($_POST['subject']) && $_POST['subject'] == 'partnership') ? 'selected' : ''; ?>>Partnership Opportunity</option>
+                        <option value="other" <?php echo (isset($_POST['subject']) && $_POST['subject'] == 'other') ? 'selected' : ''; ?>>Other</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="message">Message <span style="color:red;">*</span></label>
                     <textarea id="message" name="message" placeholder="Describe your query in detail..."
-                        required></textarea>
+                        required><?php echo isset($_POST['message']) ? htmlspecialchars($_POST['message']) : ''; ?></textarea>
                 </div>
 
                 <button type="submit" class="submit-btn">
@@ -531,24 +635,8 @@
 
     <!-- FOOTER -->
     <footer>
-        <div class="footer-links">
-            <a href="#">About Us</a>
-            <a href="#">Terms & Conditions</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">FAQ</a>
-            <a href="#">Contact</a>
-        </div>
         &copy; 2026 BusGo. All rights reserved by Prabita Adhikari.
     </footer>
-
-    <!-- FORM SUBMISSION HANDLER -->
-    <script>
-        document.getElementById('contactForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            alert('✅ Thank you for reaching out! Our team will get back to you within 24 hours.');
-            this.reset();
-        });
-    </script>
 
 </body>
 

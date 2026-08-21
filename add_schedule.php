@@ -137,7 +137,7 @@ $conn->close();
 <body>
 
     <header>
-        <h1>BusGo Admin</h1>
+        <h1>BusGo</h1>
         <nav>
             <a href="admin_dashboard.php">Dashboard</a>
             <a href="logout.php">Logout</a>

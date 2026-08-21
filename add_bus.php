@@ -15,17 +15,27 @@ if ($conn->connect_error) {
 }
 
 $msg = "";
-if (isset($_POST['submit'])) {
-    $bus_name = $_POST['bus_name'];
-    $type = $_POST['type'];
-    $total_seats = $_POST['total_seats'];
-    $fare = $_POST['fare'];
+$msgType = "";
 
-    $sql = "INSERT INTO buses (bus_name,type,total_seats,fare) VALUES ('$bus_name','$type','$total_seats','$fare')";
-    if ($conn->query($sql) === TRUE) {
-        $msg = "Bus added successfully!";
+if (isset($_POST['submit'])) {
+    $bus_name = mysqli_real_escape_string($conn, $_POST['bus_name']);
+    $type = mysqli_real_escape_string($conn, $_POST['type']);
+    $total_seats = (int) $_POST['total_seats'];
+    $fare = (float) $_POST['fare'];
+
+    // Validate seats are not negative
+    if ($total_seats <= 0) {
+        $msg = "Total seats must be at least 1!";
+        $msgType = "error";
     } else {
-        $msg = "Error: " . $conn->error;
+        $sql = "INSERT INTO buses (bus_name,type,total_seats,fare) VALUES ('$bus_name','$type','$total_seats','$fare')";
+        if ($conn->query($sql) === TRUE) {
+            $msg = "Bus added successfully!";
+            $msgType = "success";
+        } else {
+            $msg = "Error: " . $conn->error;
+            $msgType = "error";
+        }
     }
 }
 $conn->close();
@@ -35,11 +45,13 @@ $conn->close();
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
     <title>Add New Bus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #ffffff;
+            background: #f0f2f5;
             margin: 0;
             padding: 0;
         }
@@ -75,7 +87,7 @@ $conn->close();
             background: #fff;
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         h2 {
@@ -86,8 +98,9 @@ $conn->close();
 
         label {
             display: block;
-            margin-top: 10px;
+            margin-top: 15px;
             font-weight: bold;
+            color: #333;
         }
 
         input {
@@ -95,18 +108,28 @@ $conn->close();
             padding: 10px;
             margin-top: 5px;
             border-radius: 5px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
         }
 
         button {
             width: 100%;
-            padding: 10px;
-            margin-top: 15px;
+            padding: 12px;
+            margin-top: 20px;
             background: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
         }
 
         button:hover {
@@ -115,9 +138,28 @@ $conn->close();
 
         .msg {
             text-align: center;
-            color: green;
             font-weight: bold;
             margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .msg.success {
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+
+        .msg.error {
+            color: #721c24;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hint {
+            color: #6c757d;
+            font-size: 12px;
+            margin-top: 3px;
         }
     </style>
 </head>
@@ -125,7 +167,7 @@ $conn->close();
 <body>
 
     <header>
-        <h1>BusGo Admin</h1>
+        <h1>BusGo </h1>
         <nav>
             <a href="admin_dashboard.php">Dashboard</a>
             <a href="logout.php">Logout</a>
@@ -134,9 +176,13 @@ $conn->close();
 
     <div class="container">
         <h2>Add New Bus</h2>
-        <?php if ($msg != "") {
-            echo "<div class='msg'>$msg</div>";
-        } ?>
+
+        <?php if ($msg != ""): ?>
+            <div class="msg <?php echo $msgType; ?>">
+                <?php echo $msg; ?>
+            </div>
+        <?php endif; ?>
+
         <form method="POST">
             <label>Bus Name:</label>
             <input type="text" name="bus_name" placeholder="Enter bus name" required>
@@ -145,10 +191,11 @@ $conn->close();
             <input type="text" name="type" placeholder="Bus type (AC, Non-AC)" required>
 
             <label>Total Seats:</label>
-            <input type="number" name="total_seats" placeholder="Total number of seats" required>
+            <input type="number" name="total_seats" placeholder="Total number of seats" min="1" required>
+            <div class="hint">Minimum 1 seat required</div>
 
             <label>Fare:</label>
-            <input type="number" step="0.01" name="fare" placeholder="Fare per ticket" required>
+            <input type="number" step="0.01" name="fare" placeholder="Fare per ticket" min="0" required>
 
             <button type="submit" name="submit">Add Bus</button>
         </form>

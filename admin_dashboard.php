@@ -105,13 +105,85 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'admin') {
                 flex-direction: column;
             }
         }
+.welcome-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px 10px;
+    margin: 0 0 25px;  / Center with auto margins /
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    justify-content:left;
+    flex-wrap: wrap;
+    gap: 15px;
+    background-color: #007bff;
+    padding-top:2px;
+    width: 600px;
+
+}
+
+.welcome-text h2 {
+    font-size: 20px;
+    color: white;
+}
+
+
+.welcome-text p {
+    color: white;
+    font-size: 13px;
+    margin-top: 3px;
+}
+
+.welcome-text p i {
+    margin-right: 5px;
+}
+
+.welcome-actions {
+    display: flex;
+    gap: 10px;
+}
+
+
+.welcome-actions a:hover {
+    background: #dee2e6;
+    transform: translateY(-2px);
+}
+
+.welcome-actions .primary-btn {
+    background: #007bff;
+    color: white;
+}
+
+.welcome-actions .primary-btn:hover {
+    background: #0056b3;
+}
+
+/ ===== RESPONSIVE ===== /
+@media (max-width: 768px) {
+    .welcome-section {
+        flex-direction: column;
+        text-align: center;
+        padding: 18px 20px;
+        max-width: 100%;      / Full width on mobile */
+    }
+
+    .welcome-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-text h2 {
+        font-size: 18px;
+    }
+}
     </style>
 </head>
 
 <body>
 
     <header>
-        <h1>BusGo Admin</h1>
+        <h1>BusGo</h1>
         <nav>
 
             <a href="logout.php">Logout</a>
@@ -119,7 +191,14 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'admin') {
     </header>
 
     <div class="container">
-        <div class="welcome">Welcome Admin, <?php echo htmlspecialchars($_SESSION['username']); ?>!</div>
+<!-- Welcome Section - Smaller Width -->
+<div class="welcome-section">
+    <div class="welcome-text">
+        <h2><i class="fas fa-user-shield"></i> Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?></h2>
+        <p><i class="fas fa-calendar-alt"></i> <?php echo date('l, F j, Y'); ?> &nbsp;|&nbsp; <i class="fas fa-clock"></i> <?php echo date('h:i A'); ?></p>
+    </div>
+
+</div>
 
         <div class="dashboard-grid">
             <div class="card">
