@@ -12,12 +12,16 @@ $conn = new mysqli("localhost", "root", "root", "obtms");
 if ($conn->connect_error)
     die("Connection failed: " . $conn->connect_error);
 
-// Fetch user bookings
+// Fetch user bookings with bus number and fare
 $sql = "SELECT b.booking_id, b.seat_number, b.status, b.booking_time,
-               s.departure_time, s.arrival_time, r.source, r.destination, b.schedule_id
+               s.departure_time, s.arrival_time, s.fare,
+               r.source, r.destination, 
+               bus.bus_name, bus.bus_number,
+               b.schedule_id
         FROM bookings b
         JOIN schedules s ON b.schedule_id = s.schedule_id
         JOIN routes r ON s.route_id = r.route_id
+        JOIN buses bus ON s.bus_id = bus.bus_id
         WHERE b.username='$username'
         ORDER BY s.departure_time ASC";
 
@@ -171,6 +175,23 @@ $res = $conn->query($sql);
             color: #999
         }
 
+        /* Bus Number Badge */
+        .bus-number-badge {
+            background: #1a2b4c;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            margin-right: 6px
+        }
+
+        .bus-number-badge i {
+            margin-right: 4px;
+            font-size: 10px
+        }
+
         /* Status Badge */
         .badge {
             padding: 3px 12px;
@@ -310,7 +331,7 @@ $res = $conn->query($sql);
             <table>
                 <thead>
                     <tr>
-                        <th>Route</th>
+                        <th>Bus & Route</th>
                         <th>Seat</th>
                         <th>Status</th>
                         <th>Departure</th>
@@ -324,12 +345,25 @@ $res = $conn->query($sql);
                             ?>
                             <tr class="<?php echo ($status == 'cancelled') ? 'cancelled' : ''; ?>">
                                 <td>
-                                    <strong><?php echo htmlspecialchars($row['source']); ?></strong>
-                                    <i class="fas fa-arrow-right" style="color:#66b0ff;font-size:11px;margin:0 5px"></i>
-                                    <strong><?php echo htmlspecialchars($row['destination']); ?></strong>
+                                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px">
+                                        <span class="bus-number-badge"><i class="fas fa-hashtag"></i>
+                                            <?php echo htmlspecialchars($row['bus_number']); ?></span>
+                                        <span
+                                            style="font-weight:600;font-size:13px;"><?php echo htmlspecialchars($row['bus_name']); ?></span>
+                                    </div>
+                                    <div style="font-size:13px;color:#555;margin-top:2px">
+                                        <strong><?php echo htmlspecialchars($row['source']); ?></strong>
+                                        <i class="fas fa-arrow-right" style="color:#66b0ff;font-size:11px;margin:0 5px"></i>
+                                        <strong><?php echo htmlspecialchars($row['destination']); ?></strong>
+                                    </div>
                                     <div style="font-size:12px;color:#888;margin-top:2px">
                                         <i class="far fa-calendar-alt"></i>
                                         <?php echo date('M d, Y', strtotime($row['departure_time'])); ?>
+                                        <?php if (isset($row['fare'])): ?>
+                                            <span style="margin-left:12px;"><i class="fas fa-money-bill-wave"
+                                                    style="color:#28a745;"></i> NPR
+                                                <?php echo number_format($row['fare']); ?></span>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                                 <td><i class="fas fa-chair" style="color:#28a745;margin-right:5px"></i>

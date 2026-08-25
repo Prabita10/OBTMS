@@ -1,40 +1,50 @@
 <?php
 session_start();
-if (!isset($_SESSION['username']) || $_SESSION['role'] != 'admin') {
+if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
     header("Location: login.html");
     exit();
 }
 
-$servername = "localhost";
-$usernameDB = "root";
-$passwordDB = "root";
-$dbname = "obtms";
-$conn = new mysqli($servername, $usernameDB, $passwordDB, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$servername="localhost";
+$usernameDB="root";
+$passwordDB="root";
+$dbname="obtms";
+$conn = new mysqli($servername,$usernameDB,$passwordDB,$dbname);
+if($conn->connect_error){ die("Connection failed: ".$conn->connect_error); }
 
 $msg = "";
 $msgType = "";
 
-if (isset($_POST['submit'])) {
+if(isset($_POST['submit'])){
+    $bus_number = mysqli_real_escape_string($conn, trim($_POST['bus_number']));
     $bus_name = mysqli_real_escape_string($conn, $_POST['bus_name']);
     $type = mysqli_real_escape_string($conn, $_POST['type']);
-    $total_seats = (int) $_POST['total_seats'];
-    $fare = (float) $_POST['fare'];
+    $total_seats = (int)$_POST['total_seats'];
+    $status = mysqli_real_escape_string($conn, $_POST['status']);
 
     // Validate seats are not negative
-    if ($total_seats <= 0) {
+    if(empty($bus_number)){
+        $msg = "Bus number is required!";
+        $msgType = "error";
+    } elseif($total_seats <= 0){
         $msg = "Total seats must be at least 1!";
         $msgType = "error";
     } else {
-        $sql = "INSERT INTO buses (bus_name,type,total_seats,fare) VALUES ('$bus_name','$type','$total_seats','$fare')";
-        if ($conn->query($sql) === TRUE) {
-            $msg = "Bus added successfully!";
-            $msgType = "success";
-        } else {
-            $msg = "Error: " . $conn->error;
+        // Check if bus_number already exists
+        $check = $conn->query("SELECT bus_id FROM buses WHERE bus_number = '$bus_number'");
+        if($check->num_rows > 0){
+            $msg = "Bus number '$bus_number' already exists! Please use a different number.";
             $msgType = "error";
+        } else {
+            $sql = "INSERT INTO buses (bus_number, bus_name, type, total_seats, status) 
+                    VALUES ('$bus_number', '$bus_name', '$type', '$total_seats', '$status')";
+            if($conn->query($sql)===TRUE){
+                $msg = "Bus added successfully!";
+                $msgType = "success";
+            } else { 
+                $msg = "Error: ".$conn->error;
+                $msgType = "error";
+            }
         }
     }
 }
@@ -43,164 +53,180 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Add New Bus</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
-            margin: 0;
-            padding: 0;
-        }
+<meta charset="UTF-8">
+<title>Add New Bus</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4fb;min-height:100vh}
 
-        header {
-            background-color: #1a2b4c;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+header{background:#1a2b4c;color:#fff;padding:15px 35px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:22px}
+header h1 span{color:#66b0ff}
+header nav a{color:rgba(255,255,255,0.85);text-decoration:none;margin-left:18px;font-size:14px;padding:6px 14px;border-radius:5px;transition:0.2s}
+header nav a:hover{background:rgba(255,255,255,0.1)}
+header nav a.dashboard{background:rgba(255,255,255,0.08)}
+header nav a.logout{background:#dc3545;color:#fff}
+header nav a.logout:hover{background:#c82333}
 
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
+.container{max-width:600px;margin:40px auto;padding:0 20px}
 
-        header nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-            font-weight: bold;
-        }
+.card{background:#fff;border-radius:14px;padding:35px;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid #e8ecf3}
+.card-header{text-align:center;margin-bottom:25px}
+.card-header h2{color:#1a2b4c;font-size:24px}
+.card-header h2 i{color:#66b0ff;margin-right:10px}
+.card-header p{color:#6b7a8f;font-size:14px;margin-top:5px}
 
-        header nav a:hover {
-            text-decoration: underline;
-        }
+.msg{text-align:center;font-weight:500;margin-bottom:15px;padding:10px;border-radius:8px}
+.msg.success{color:#155724;background:#d4edda;border:1px solid #c3e6cb}
+.msg.error{color:#721c24;background:#f8d7da;border:1px solid #f5c6cb}
 
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: #fff;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:#1a2b4c;margin-bottom:5px}
+.form-group label i{color:#66b0ff;margin-right:6px;width:18px}
+.form-group label .required{color:#dc3545}
 
-        h2 {
-            color: #1a2b4c;
-            text-align: center;
-            margin-bottom: 20px;
-        }
+.input-wrapper{position:relative}
+.input-wrapper .icon-left{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#6b7a8f;font-size:15px;pointer-events:none}
 
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-            color: #333;
-        }
+.form-group input,
+.form-group select{
+    width:100%;
+    padding:12px 15px 12px 45px;
+    border:2px solid #e2e8f0;
+    border-radius:8px;
+    font-size:14px;
+    transition:0.3s;
+    background:#fafcff;
+    color:#1a2b4c;
+    appearance:none;
+    -webkit-appearance:none;
+}
 
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
+.form-group select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7a8f' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 15px center;
+    padding-right:40px;
+}
 
-        input:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-        }
+.form-group input:focus,
+.form-group select:focus{
+    outline:none;
+    border-color:#1a2b4c;
+    box-shadow:0 0 0 4px rgba(26,43,76,0.08);
+    background:#fff;
+}
+.form-group input:hover,
+.form-group select:hover{border-color:#66b0ff}
 
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-        }
+.hint{font-size:11px;color:#6b7a8f;margin-top:4px}
+.hint i{margin-right:4px}
 
-        button:hover {
-            background: #0056b3;
-        }
+.btn-submit{width:100%;padding:12px;background:#1a2b4c;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:5px}
+.btn-submit:hover{background:#2a4a7a;transform:scale(1.01);box-shadow:0 4px 12px rgba(26,43,76,0.3)}
 
-        .msg {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 5px;
-        }
+.back-link{display:block;text-align:center;margin-top:18px;color:#6b7a8f;text-decoration:none;font-size:14px}
+.back-link:hover{color:#1a2b4c}
+.back-link i{margin-right:6px}
 
-        .msg.success {
-            color: #155724;
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-        }
-
-        .msg.error {
-            color: #721c24;
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-        }
-
-        .hint {
-            color: #6c757d;
-            font-size: 12px;
-            margin-top: 3px;
-        }
-    </style>
+@media(max-width:600px){
+    header{padding:12px 20px;flex-wrap:wrap}
+    header h1{font-size:18px}
+    header nav a{margin-left:8px;padding:5px 10px;font-size:12px}
+    .card{padding:25px}
+}
+</style>
 </head>
-
 <body>
 
-    <header>
-        <h1>BusGo </h1>
-        <nav>
-            <a href="admin_dashboard.php">Dashboard</a>
-            <a href="logout.php">Logout</a>
-        </nav>
-    </header>
+<header>
+    <h1>Bus<span>Go</span></h1>
+    <nav>
+        <a href="admin_dashboard.php" class="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="logout.php" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+</header>
 
-    <div class="container">
-        <h2>Add New Bus</h2>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-bus"></i> Add New Bus</h2>
+            <p>Add a new bus to your fleet</p>
+        </div>
 
-        <?php if ($msg != ""): ?>
+        <?php if($msg!=""): ?>
             <div class="msg <?php echo $msgType; ?>">
+                <i class="fas <?php echo $msgType == 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'; ?>"></i>
                 <?php echo $msg; ?>
             </div>
         <?php endif; ?>
 
         <form method="POST">
-            <label>Bus Name:</label>
-            <input type="text" name="bus_name" placeholder="Enter bus name" required>
+            <div class="form-group">
+                <label><i class="fas fa-hashtag"></i> Bus Number <span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <i class="fas fa-hashtag icon-left"></i>
+                    <input type="text" name="bus_number" placeholder="e.g., BUS-001" required>
+                </div>
+                <div class="hint"><i class="fas fa-info-circle"></i> Unique bus identifier (e.g., BUS-001, BUS-002)</div>
+            </div>
 
-            <label>Type:</label>
-            <input type="text" name="type" placeholder="Bus type (AC, Non-AC)" required>
+            <div class="form-group">
+                <label><i class="fas fa-bus"></i> Bus Name <span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <i class="fas fa-bus icon-left"></i>
+                    <input type="text" name="bus_name" placeholder="Enter bus name" required>
+                </div>
+            </div>
 
-            <label>Total Seats:</label>
-            <input type="number" name="total_seats" placeholder="Total number of seats" min="1" required>
-            <div class="hint">Minimum 1 seat required</div>
+            <div class="form-group">
+                <label><i class="fas fa-chair"></i> Type <span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <i class="fas fa-chair icon-left"></i>
+                    <select name="type" required>
+                        <option value="AC">AC</option>
+                        <option value="Non-AC">Non-AC</option>
+                        <option value="Deluxe">Deluxe</option>
+                        <option value="Sleeper">Sleeper</option>
+                    </select>
+                </div>
+            </div>
 
-            <label>Fare:</label>
-            <input type="number" step="0.01" name="fare" placeholder="Fare per ticket" min="0" required>
+            <div class="form-group">
+                <label><i class="fas fa-users"></i> Total Seats <span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <i class="fas fa-users icon-left"></i>
+                    <input type="number" name="total_seats" placeholder="Total number of seats" min="1" required>
+                </div>
+                <div class="hint"><i class="fas fa-info-circle"></i> Minimum 1 seat required</div>
+            </div>
 
-            <button type="submit" name="submit">Add Bus</button>
+            <div class="form-group">
+                <label><i class="fas fa-circle"></i> Status</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-circle icon-left"></i>
+                    <select name="status">
+                        <option value="active">Active</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="hint"><i class="fas fa-info-circle"></i> Set bus availability status</div>
+            </div>
+
+            <button type="submit" name="submit" class="btn-submit">
+                <i class="fas fa-plus-circle"></i> Add Bus
+            </button>
         </form>
+
+        <a href="admin_manage_buses.php" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Buses
+        </a>
     </div>
+</div>
 
 </body>
-
 </html>

@@ -48,7 +48,7 @@ function getWeather($city, $apiKey)
     return null;
 }
 
-// NEW: Get weather forecast for specific date
+// Get weather forecast for specific date
 function getWeatherForecast($city, $date, $apiKey)
 {
     if (empty($city))
@@ -119,22 +119,30 @@ $results = [];
 $from = $to = $date = "";
 $fromWeather = null;
 $toWeather = null;
-$apiKey = "8b4de5cb6bb84984b5d3c0160dea5b38"; // Get from https://openweathermap.org/api
+$apiKey = "870075332636eb4d157db509de07a100";
 
 if (isset($_GET['search'])) {
     $from = $_GET['from'];
     $to = $_GET['to'];
     $date = $_GET['date'];
 
-    // SQL query
-    $sql = "SELECT s.schedule_id, b.bus_name, b.type, b.fare, s.departure_time, s.arrival_time, s.available_seats, b.total_seats,
-                   r.source, r.destination
+    // Updated SQL query with bus_number
+    $sql = "SELECT s.schedule_id, 
+                   b.bus_number,
+                   b.bus_name, 
+                   b.type, 
+                   b.total_seats,
+                   s.fare,
+                   s.departure_time, 
+                   s.arrival_time,
+                   r.source, 
+                   r.destination,
+                   (SELECT COUNT(*) FROM bookings WHERE schedule_id = s.schedule_id AND status != 'canceled') as booked_seats
             FROM schedules s
-            JOIN buses b ON s.bus_id=b.bus_id
-            JOIN routes r ON s.route_id=r.route_id
+            JOIN buses b ON s.bus_id = b.bus_id
+            JOIN routes r ON s.route_id = r.route_id
             WHERE r.source='$from' AND r.destination='$to'
-              AND DATE(s.arrival_time)='$date'
-              AND s.available_seats>0
+              AND DATE(s.departure_time)='$date'
             ORDER BY s.departure_time ASC";
 
     $res = $conn->query($sql);
@@ -347,6 +355,23 @@ $conn->close();
             flex: 1
         }
 
+        .bus-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 4px
+        }
+
+        .bus-number {
+            background: #1a2b4c;
+            color: #fff;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600
+        }
+
         .bus-name {
             font-size: 18px;
             font-weight: 700;
@@ -363,15 +388,36 @@ $conn->close();
             padding: 2px 12px;
             border-radius: 12px;
             font-size: 12px;
-            color: #1a2b4c;
-            margin-left: 10px
+            color: #1a2b4c
+        }
+
+        .available-badge {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600
+        }
+
+        .available-badge.available {
+            background: #d4edda;
+            color: #155724
+        }
+
+        .available-badge.limited {
+            background: #fff3cd;
+            color: #856404
+        }
+
+        .available-badge.full {
+            background: #f8d7da;
+            color: #721c24
         }
 
         .bus-details {
             display: flex;
             flex-wrap: wrap;
             gap: 18px;
-            margin-top: 8px;
+            margin-top: 6px;
             font-size: 14px;
             color: #555
         }
@@ -426,6 +472,11 @@ $conn->close();
         .book-btn:hover {
             background: #218838;
             transform: scale(1.03)
+        }
+
+        .book-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed
         }
 
         .book-btn i {
@@ -710,13 +761,20 @@ $conn->close();
                     <span class="count"><i class="fas fa-chair"></i> <?php echo count($results); ?> buses found</span>
                 </div>
 
-                <?php foreach ($results as $row): ?>
+                <?php foreach ($results as $row):
+                    $available_seats = $row['total_seats'] - $row['booked_seats'];
+                    $status_class = $available_seats > 10 ? 'available' : ($available_seats > 0 ? 'limited' : 'full');
+                    $status_text = $available_seats > 10 ? 'Available' : ($available_seats > 0 ? 'Limited' : 'Full');
+                    ?>
                     <div class="bus-card">
                         <div class="bus-info">
-                            <div>
+                            <div class="bus-header">
+                                <span class="bus-number"><i class="fas fa-hashtag"></i>
+                                    <?php echo htmlspecialchars($row['bus_number']); ?></span>
                                 <span class="bus-name"><i class="fas fa-bus"></i>
                                     <?php echo htmlspecialchars($row['bus_name']); ?></span>
                                 <span class="bus-type"><?php echo htmlspecialchars($row['type']); ?></span>
+                                <span class="available-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span>
                             </div>
                             <div class="bus-details">
                                 <span><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($row['source']); ?> →
@@ -729,7 +787,7 @@ $conn->close();
                             <div class="fare-seats">
                                 <span class="fare"><i class="fas fa-money-bill-wave"></i> NPR
                                     <?php echo number_format($row['fare']); ?></span>
-                                <span class="seats"><i class="fas fa-chair"></i> <?php echo $row['available_seats']; ?> /
+                                <span class="seats"><i class="fas fa-chair"></i> <?php echo $available_seats; ?> /
                                     <?php echo $row['total_seats']; ?> seats</span>
                             </div>
                             <?php if ($fromWeather && $toWeather): ?>
@@ -742,7 +800,9 @@ $conn->close();
                         </div>
                         <form method="GET" action="book_seat.php">
                             <input type="hidden" name="schedule_id" value="<?php echo $row['schedule_id']; ?>">
-                            <button type="submit" class="book-btn"><i class="fas fa-ticket-alt"></i> Book</button>
+                            <button type="submit" class="book-btn" <?php echo $available_seats <= 0 ? 'disabled' : ''; ?>>
+                                <i class="fas fa-ticket-alt"></i> <?php echo $available_seats > 0 ? 'Book' : 'Full'; ?>
+                            </button>
                         </form>
                     </div>
                 <?php endforeach; ?>

@@ -17,33 +17,63 @@ $msg="";
 $msgType="";
 
 // Fetch buses and routes
-$buses=$conn->query("SELECT bus_id, bus_name FROM buses");
-$routes=$conn->query("SELECT route_id, source, destination FROM routes");
+$buses = $conn->query("SELECT bus_id, bus_number, bus_name FROM buses WHERE status = 'active'");
+$routes = $conn->query("SELECT route_id, source, destination FROM routes");
 
 // Fetch current schedule
-$schedule=$conn->query("SELECT * FROM schedules WHERE schedule_id=$id")->fetch_assoc();
+$schedule = $conn->query("SELECT s.*, b.total_seats 
+                          FROM schedules s 
+                          JOIN buses b ON s.bus_id = b.bus_id 
+                          WHERE s.schedule_id=$id")->fetch_assoc();
 
 if(isset($_POST['update'])){
     $bus_id = (int)$_POST['bus_id'];
     $route_id = (int)$_POST['route_id'];
     $departure_time = mysqli_real_escape_string($conn, $_POST['departure_time']);
     $arrival_time = mysqli_real_escape_string($conn, $_POST['arrival_time']);
-    $available_seats = (int)$_POST['available_seats'];
+    $fare = (float)$_POST['fare'];
 
-    $sql="UPDATE schedules SET bus_id=$bus_id, route_id=$route_id, departure_time='$departure_time', arrival_time='$arrival_time', available_seats=$available_seats WHERE schedule_id=$id";
-    if($conn->query($sql)===TRUE){ 
-        $msg="Schedule updated successfully!";
-        $msgType="success";
-    } else { 
-        $msg="Error: ".$conn->error;
-        $msgType="error";
+    // Validate
+    if($fare < 0){
+        $msg = "Fare cannot be negative!";
+        $msgType = "error";
+    } elseif(strtotime($departure_time) >= strtotime($arrival_time)){
+        $msg = "Departure time must be before arrival time!";
+        $msgType = "error";
+    } else {
+        $sql = "UPDATE schedules SET 
+                bus_id=$bus_id, 
+                route_id=$route_id, 
+                departure_time='$departure_time', 
+                arrival_time='$arrival_time',
+                fare='$fare' 
+                WHERE schedule_id=$id";
+        if($conn->query($sql)===TRUE){ 
+            $msg = "Schedule updated successfully!";
+            $msgType = "success";
+        } else { 
+            $msg = "Error: ".$conn->error;
+            $msgType = "error";
+        }
     }
     // Refresh schedule
-    $schedule=$conn->query("SELECT * FROM schedules WHERE schedule_id=$id")->fetch_assoc();
+    $schedule = $conn->query("SELECT s.*, b.total_seats 
+                              FROM schedules s 
+                              JOIN buses b ON s.bus_id = b.bus_id 
+                              WHERE s.schedule_id=$id")->fetch_assoc();
     // Refresh buses and routes
-    $buses=$conn->query("SELECT bus_id, bus_name FROM buses");
-    $routes=$conn->query("SELECT route_id, source, destination FROM routes");
+    $buses = $conn->query("SELECT bus_id, bus_number, bus_name FROM buses WHERE status = 'active'");
+    $routes = $conn->query("SELECT route_id, source, destination FROM routes");
 }
+
+// Calculate booked seats and available seats
+$booked_sql = "SELECT COUNT(*) as booked FROM bookings WHERE schedule_id = $id AND status != 'canceled'";
+$booked_result = $conn->query($booked_sql);
+$booked = $booked_result->fetch_assoc();
+$booked_seats = $booked['booked'];
+$available_seats = $schedule['total_seats'] - $booked_seats;
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -146,9 +176,9 @@ body {
     margin-bottom: 28px;
     border: 1px solid #dce4f0;
     display: grid;
-    grid-template-columns: 1fr auto 1fr auto 1fr;
+    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
     align-items: center;
-    gap: 10px;
+    gap: 5px;
 }
 
 .schedule-preview .preview-item {
@@ -432,6 +462,38 @@ body {
         font-size: 13px;
     }
 }
+
+/* Info Box */
+.info-box {
+    background: #e8f0fe;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.info-box .info-item {
+    font-size: 13px;
+    color: #1a2b4c;
+}
+.info-box .info-item strong {
+    color: #1a2b4c;
+}
+.info-box .info-item .seats-available {
+    color: #28a745;
+    font-weight: 700;
+}
+.info-box .info-item .seats-booked {
+    color: #dc3545;
+    font-weight: 700;
+}
+.info-box .info-item .seats-total {
+    color: #007bff;
+    font-weight: 700;
+}
 </style>
 </head>
 <body>
@@ -466,8 +528,28 @@ body {
             <i class="fas fa-circle" style="font-size: 6px; color: #66b0ff;"></i>
         </div>
         <div class="preview-item">
-            <span class="value preview-bus"><i class="fas fa-chair"></i> <?php echo $schedule['available_seats']; ?></span>
+            <span class="value preview-bus"><i class="fas fa-money-bill-wave"></i> NPR <?php echo number_format($schedule['fare'] ?? 0, 2); ?></span>
+            <span class="label">Fare</span>
+        </div>
+        <div class="preview-divider">
+            <i class="fas fa-circle" style="font-size: 6px; color: #66b0ff;"></i>
+        </div>
+        <div class="preview-item">
+            <span class="value preview-bus"><i class="fas fa-chair"></i> <?php echo $available_seats; ?></span>
             <span class="label">Available Seats</span>
+        </div>
+    </div>
+
+    <!-- Seat Info Box -->
+    <div class="info-box">
+        <div class="info-item">
+            <i class="fas fa-chair"></i> Total: <strong class="seats-total"><?php echo $schedule['total_seats']; ?></strong>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-user-check"></i> Booked: <strong class="seats-booked"><?php echo $booked_seats; ?></strong>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-chair"></i> Available: <strong class="seats-available"><?php echo $available_seats; ?></strong>
         </div>
     </div>
 
@@ -492,7 +574,7 @@ body {
                         while($b=$buses->fetch_assoc()): 
                         ?>
                             <option value="<?php echo $b['bus_id']; ?>" <?php if($b['bus_id']==$schedule['bus_id']) echo 'selected'; ?>>
-                                <?php echo htmlspecialchars($b['bus_name']); ?>
+                                <?php echo $b['bus_number'] . ' - ' . htmlspecialchars($b['bus_name']); ?>
                             </option>
                         <?php endwhile; ?>
                     </select>
@@ -536,10 +618,10 @@ body {
         </div>
 
         <div class="form-group">
-            <label>Available Seats <span class="required">*</span></label>
+            <label>Fare (NPR) <span class="required">*</span></label>
             <div class="input-wrapper">
-                <i class="fas fa-chair icon-left"></i>
-                <input type="number" name="available_seats" value="<?php echo $schedule['available_seats']; ?>" required min="0" placeholder="Enter available seats">
+                <i class="fas fa-money-bill-wave icon-left"></i>
+                <input type="number" step="0.01" name="fare" value="<?php echo $schedule['fare'] ?? 0; ?>" required min="0" placeholder="Enter fare amount">
             </div>
         </div>
 

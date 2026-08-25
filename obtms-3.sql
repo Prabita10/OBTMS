@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Aug 21, 2026 at 02:47 PM
+-- Generation Time: Aug 25, 2026 at 05:31 PM
 -- Server version: 8.0.44
 -- PHP Version: 8.3.28
 
@@ -105,7 +105,11 @@ INSERT INTO `bookings` (`booking_id`, `username`, `schedule_id`, `seat_number`, 
 (108, 'prabita', 10, '1', 'confirmed', '2026-08-16 21:40:12'),
 (110, 'prabita', 10, '2', 'confirmed', '2026-08-16 21:42:14'),
 (111, 'prabita', 10, '6', 'confirmed', '2026-08-16 21:42:14'),
-(112, 'prabita', 10, '3', 'confirmed', '2026-08-17 10:08:26');
+(112, 'prabita', 10, '3', 'confirmed', '2026-08-17 10:08:26'),
+(113, 'prabita', 11, '1', 'confirmed', '2026-08-25 23:05:48'),
+(114, 'prabita', 11, '2', 'confirmed', '2026-08-25 23:05:48'),
+(115, 'prabita', 11, '3', 'confirmed', '2026-08-25 23:05:48'),
+(116, 'prabita', 11, '4', 'confirmed', '2026-08-25 23:05:48');
 
 -- --------------------------------------------------------
 
@@ -115,22 +119,25 @@ INSERT INTO `bookings` (`booking_id`, `username`, `schedule_id`, `seat_number`, 
 
 CREATE TABLE `buses` (
   `bus_id` int NOT NULL,
+  `bus_number` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
   `bus_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
   `type` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `total_seats` int NOT NULL,
-  `fare` decimal(10,2) NOT NULL
+  `status` enum('active','maintenance','inactive') COLLATE utf8mb4_general_ci DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `buses`
 --
 
-INSERT INTO `buses` (`bus_id`, `bus_name`, `type`, `total_seats`, `fare`) VALUES
-(1, 'Express Lined', 'AC', 40, 1199.95),
-(2, 'Mountain Rider', 'Non-AC', 30, 800.00),
-(3, 'City Shuttle', 'AC', 50, 1000.00),
-(7, 'My Travels', 'AC', 20, 300.00),
-(8, 'Deluxe', 'AC', 30, 500.00);
+INSERT INTO `buses` (`bus_id`, `bus_number`, `bus_name`, `type`, `total_seats`, `status`) VALUES
+(1, 'BUS-001', 'Express Lined', 'AC', 40, 'active'),
+(2, 'BUS-002', 'Mountain Rider', 'Non-AC', 30, 'active'),
+(3, 'BUS-003', 'City Shuttle', 'AC', 50, 'active'),
+(7, 'BUS-007', 'My Travels', 'AC', 20, 'active'),
+(8, 'BUS-008', 'Deluxe', 'AC', 30, 'active'),
+(9, 'BUS-200', 'Deluxe', 'Sleeper', 40, 'active'),
+(10, 'BUS-201', 'Micro', 'AC', 10, 'active');
 
 -- --------------------------------------------------------
 
@@ -154,7 +161,8 @@ INSERT INTO `cancel_feedback` (`id`, `booking_id`, `username`, `feedback`, `canc
 (1, 64, 'prabita', 'i dont want this booking.', '2026-08-15 00:19:46'),
 (2, 65, 'prabita', 'i dont want this .', '2026-08-15 00:27:01'),
 (3, 67, 'prabita', 'not interested', '2026-08-16 12:20:01'),
-(4, 109, 'prabita', 'misbooked', '2026-08-16 21:44:39');
+(4, 109, 'prabita', 'misbooked', '2026-08-16 21:44:39'),
+(5, 117, 'prabita', 'misbooked', '2026-08-25 23:12:56');
 
 -- --------------------------------------------------------
 
@@ -181,7 +189,8 @@ INSERT INTO `routes` (`route_id`, `source`, `destination`, `stops`) VALUES
 (8, 'Dang', 'Mustang', ''),
 (9, 'baglung', 'tanahun', ''),
 (10, 'palpa', 'dolpa', ''),
-(11, 'kathmandu', 'butwal', 'thankot,muglin');
+(11, 'kathmandu', 'butwal', 'thankot,muglin'),
+(12, 'Damauli', 'Kathmandu', 'Mugling');
 
 -- --------------------------------------------------------
 
@@ -195,21 +204,23 @@ CREATE TABLE `schedules` (
   `route_id` int NOT NULL,
   `departure_time` datetime NOT NULL,
   `arrival_time` datetime NOT NULL,
-  `available_seats` int NOT NULL
+  `fare` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `schedules`
 --
 
-INSERT INTO `schedules` (`schedule_id`, `bus_id`, `route_id`, `departure_time`, `arrival_time`, `available_seats`) VALUES
-(2, 2, 2, '2026-06-28 14:24:00', '2026-06-28 12:30:00', 30),
-(3, 3, 3, '2026-06-15 08:00:00', '2026-06-15 14:00:00', 43),
-(6, 7, 7, '2026-06-20 05:00:00', '2026-06-20 09:00:00', 20),
-(7, 1, 8, '2026-08-16 00:21:00', '2026-08-16 02:22:00', 24),
-(8, 1, 9, '2026-08-16 00:34:00', '2026-08-17 00:35:00', 1),
-(9, 1, 9, '2026-08-20 00:49:00', '2026-08-21 00:49:00', 39),
-(10, 8, 10, '2026-08-20 21:32:00', '2026-08-21 21:32:00', 36);
+INSERT INTO `schedules` (`schedule_id`, `bus_id`, `route_id`, `departure_time`, `arrival_time`, `fare`) VALUES
+(2, 2, 2, '2026-06-28 14:24:00', '2026-06-28 12:30:00', 800.00),
+(3, 3, 3, '2026-06-15 08:00:00', '2026-06-15 14:00:00', 1000.00),
+(6, 7, 7, '2026-06-20 05:00:00', '2026-06-20 09:00:00', 300.00),
+(7, 1, 8, '2026-08-16 00:21:00', '2026-08-16 02:22:00', 1199.95),
+(8, 1, 9, '2026-08-16 00:34:00', '2026-08-17 00:35:00', 1199.95),
+(9, 1, 9, '2026-08-20 00:49:00', '2026-08-21 00:49:00', 1199.95),
+(10, 8, 10, '2026-08-20 21:32:00', '2026-08-21 21:32:00', 500.00),
+(11, 9, 12, '2026-08-30 01:00:00', '2026-08-30 02:00:00', 700.00),
+(12, 10, 12, '2026-08-30 03:00:00', '2026-08-30 04:00:00', 700.00);
 
 -- --------------------------------------------------------
 
@@ -234,7 +245,7 @@ INSERT INTO `user` (`id`, `fullname`, `email`, `phone`, `username`, `password`) 
 (5, 'Pele', 'pele363@gmail.com', '9846098802', 'pele', 'Pele@10'),
 (6, 'kiran Ghimire', 'kiranghimire363@gmail.com', '9843466364', 'kiran', 'Kiran@10'),
 (7, 'Saugat', 'saugat@gmail.com', '9876543212', 'saugat', 'Saugat@10'),
-(8, 'Prabita Adhikari', 'prabitadhikari792@gmail.com', '9816109990', 'prabita', '$2y$10$nyZ3Z1eJoUXNVnF0963uTeBPIUskbfM0ttfFW4aTdaujJU8axjLpa'),
+(8, 'Prabita Adhikari', 'prabitadhikari792@gmail.com', '9816109990', 'prabita', 'Prabita@10'),
 (9, 'Evana1234', 'evana123@gmail.com', '9806520318', 'evana', 'Evana@10'),
 (12, 'Shine Chhetri', 'shine@gmail.com', '9816109990', 'shine123', 'Shine@10'),
 (13, 'Ramala Adhikari', 'ramala1@gmail.com', '9816109990', 'ramala', 'Ramala@10'),
@@ -263,7 +274,9 @@ ALTER TABLE `bookings`
 -- Indexes for table `buses`
 --
 ALTER TABLE `buses`
-  ADD PRIMARY KEY (`bus_id`);
+  ADD PRIMARY KEY (`bus_id`),
+  ADD UNIQUE KEY `bus_number` (`bus_number`),
+  ADD UNIQUE KEY `bus_number_2` (`bus_number`);
 
 --
 -- Indexes for table `cancel_feedback`
@@ -307,31 +320,31 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
+  MODIFY `booking_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT for table `buses`
 --
 ALTER TABLE `buses`
-  MODIFY `bus_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `bus_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `cancel_feedback`
 --
 ALTER TABLE `cancel_feedback`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `routes`
 --
 ALTER TABLE `routes`
-  MODIFY `route_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `route_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `schedules`
 --
 ALTER TABLE `schedules`
-  MODIFY `schedule_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `schedule_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `user`

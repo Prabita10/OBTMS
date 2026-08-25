@@ -17,18 +17,32 @@ $msg = "";
 $msgType = "";
 
 if(isset($_POST['update'])){
+    $bus_number = mysqli_real_escape_string($conn, $_POST['bus_number']);
     $bus_name = mysqli_real_escape_string($conn, $_POST['bus_name']);
     $type = mysqli_real_escape_string($conn, $_POST['type']);
     $total_seats = (int)$_POST['total_seats'];
-    $fare = (float)$_POST['fare'];
+    $status = mysqli_real_escape_string($conn, $_POST['status']);
 
-    $sql = "UPDATE buses SET bus_name='$bus_name', type='$type', total_seats='$total_seats', fare='$fare' WHERE bus_id=$id";
-    if($conn->query($sql)===TRUE){ 
-        $msg = "Bus updated successfully!";
-        $msgType = "success";
-    } else { 
-        $msg = "Error: ".$conn->error;
+    // Check if bus_number already exists (excluding current bus)
+    $check = $conn->query("SELECT bus_id FROM buses WHERE bus_number = '$bus_number' AND bus_id != $id");
+    if($check->num_rows > 0){
+        $msg = "Bus number already exists!";
         $msgType = "error";
+    } else {
+        $sql = "UPDATE buses SET 
+                bus_number='$bus_number',
+                bus_name='$bus_name', 
+                type='$type', 
+                total_seats='$total_seats',
+                status='$status' 
+                WHERE bus_id=$id";
+        if($conn->query($sql)===TRUE){ 
+            $msg = "Bus updated successfully!";
+            $msgType = "success";
+        } else { 
+            $msg = "Error: ".$conn->error;
+            $msgType = "error";
+        }
     }
 }
 
@@ -187,13 +201,19 @@ body {
     margin-left: 2px;
 }
 
-.form-group .field-icon {
+/* Input with icon wrapper */
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper .icon-left {
     position: absolute;
     left: 15px;
     top: 50%;
     transform: translateY(-50%);
     color: #6b7a8f;
     font-size: 15px;
+    pointer-events: none;
 }
 
 .form-group input,
@@ -219,21 +239,6 @@ body {
 .form-group input:hover,
 .form-group select:hover {
     border-color: #66b0ff;
-}
-
-/* Input with icon wrapper */
-.input-wrapper {
-    position: relative;
-}
-
-.input-wrapper .icon-left {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6b7a8f;
-    font-size: 15px;
-    pointer-events: none;
 }
 
 /* Two columns layout */
@@ -356,6 +361,11 @@ body {
         font-size: 13px;
     }
 }
+
+/* Status badge styles in select */
+select option.status-active { color: #28a745; }
+select option.status-maintenance { color: #ffc107; }
+select option.status-inactive { color: #dc3545; }
 </style>
 </head>
 <body>
@@ -385,23 +395,36 @@ body {
     <form method="POST">
         <div class="form-row">
             <div class="form-group">
+                <label>Bus Number <span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <i class="fas fa-hashtag icon-left"></i>
+                    <input type="text" name="bus_number" value="<?php echo htmlspecialchars($bus['bus_number']); ?>" placeholder="e.g., BUS-001" required>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label>Bus Name <span class="required">*</span></label>
                 <div class="input-wrapper">
                     <i class="fas fa-bus icon-left"></i>
                     <input type="text" name="bus_name" value="<?php echo htmlspecialchars($bus['bus_name']); ?>" placeholder="Enter bus name" required>
                 </div>
             </div>
+        </div>
 
+        <div class="form-row">
             <div class="form-group">
                 <label>Type <span class="required">*</span></label>
                 <div class="input-wrapper">
                     <i class="fas fa-chair icon-left"></i>
-                    <input type="text" name="type" value="<?php echo htmlspecialchars($bus['type']); ?>" placeholder="e.g. AC, Non-AC" required>
+                    <select name="type" required>
+                        <option value="AC" <?php echo ($bus['type'] == 'AC') ? 'selected' : ''; ?>>AC</option>
+                        <option value="Non-AC" <?php echo ($bus['type'] == 'Non-AC') ? 'selected' : ''; ?>>Non-AC</option>
+                        <option value="Deluxe" <?php echo ($bus['type'] == 'Deluxe') ? 'selected' : ''; ?>>Deluxe</option>
+                        <option value="Sleeper" <?php echo ($bus['type'] == 'Sleeper') ? 'selected' : ''; ?>>Sleeper</option>
+                    </select>
                 </div>
             </div>
-        </div>
 
-        <div class="form-row">
             <div class="form-group">
                 <label>Total Seats <span class="required">*</span></label>
                 <div class="input-wrapper">
@@ -409,13 +432,17 @@ body {
                     <input type="number" name="total_seats" value="<?php echo $bus['total_seats']; ?>" placeholder="Enter total seats" required min="1">
                 </div>
             </div>
+        </div>
 
-            <div class="form-group">
-                <label>Fare (NPR) <span class="required">*</span></label>
-                <div class="input-wrapper">
-                    <i class="fas fa-money-bill-wave icon-left"></i>
-                    <input type="number" step="0.01" name="fare" value="<?php echo $bus['fare']; ?>" placeholder="Enter fare amount" required min="0">
-                </div>
+        <div class="form-group">
+            <label>Status</label>
+            <div class="input-wrapper">
+                <i class="fas fa-circle icon-left"></i>
+                <select name="status">
+                    <option value="active" <?php echo ($bus['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
+                    <option value="maintenance" <?php echo ($bus['status'] == 'maintenance') ? 'selected' : ''; ?>>Maintenance</option>
+                    <option value="inactive" <?php echo ($bus['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                </select>
             </div>
         </div>
 
@@ -423,7 +450,7 @@ body {
             <button type="submit" name="update" class="btn btn-update">
                 <i class="fas fa-save"></i> Update Bus
             </button>
-            <a href="admin_dashboard.php" class="btn btn-back">
+            <a href="admin_manage_buses.php" class="btn btn-back">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
         </div>
