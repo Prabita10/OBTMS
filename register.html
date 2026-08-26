@@ -218,10 +218,11 @@
             }
 
             // Email Validation
-            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
-            if (!emailPattern.test(email)) {
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|hotmail\.com|outlook\.com|icloud\.com)$/i;
+
+            if (!emailPattern.test(email.trim())) {
                 e.preventDefault();
-                errorMsg.textContent = "Enter a valid email address.";
+                errorMsg.textContent = "Please use a valid Gmail, Yahoo, Hotmail, Outlook, or iCloud email address.";
                 return;
             }
 
@@ -231,6 +232,7 @@
                 errorMsg.textContent = "Phone must be 10 digits starting with 9.";
                 return;
             }
+       
 
             // Username Validation
             if (!/^(?=.*[A-Za-z])[A-Za-z0-9@#$%^&*()_+!~`{}[\]:;"'<>,.?\/\\|-]{3,15}$/.test(username)) {
@@ -240,10 +242,10 @@
             }
 
             // Password Validation
-            const passPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{5,}$/;
+            const passPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
             if (!passPattern.test(password)) {
                 e.preventDefault();
-                errorMsg.textContent = "Password must be at least 5 chars with 1 capital, 1 digit, 1 special.";
+                errorMsg.textContent = "Password must be at least 8 chars with 1 capital, 1 digit, 1 special.";
                 return;
             }
 
