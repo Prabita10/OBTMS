@@ -5,7 +5,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
     exit();
 }
 
-$servername="localhost";
+$servername="localhost"; //sana
 $usernameDB="root";
 $passwordDB="";
 $dbname="obtms";
