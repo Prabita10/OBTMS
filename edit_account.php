@@ -13,7 +13,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
 // Database connection
 $servername = "localhost";
 $usernameDB = "root";
-$passwordDB = "root";
+$passwordDB = "";
 $dbname = "obtms";
 
 $conn = new mysqli($servername, $usernameDB, $passwordDB, $dbname);

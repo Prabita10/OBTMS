@@ -5,7 +5,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'admin') {
     exit();
 }
 
-$conn = new mysqli("localhost", "root", "root", "obtms");
+$conn = new mysqli("localhost", "root", "", "obtms");
 if ($conn->connect_error)
     die("Connection failed: " . $conn->connect_error);
 

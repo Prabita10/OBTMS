@@ -2,7 +2,7 @@
 // Database connection
 $servername = "localhost";
 $usernameDB = "root"; // your MySQL username
-$passwordDB = "root";     // your MySQL password
+$passwordDB = "";     // your MySQL password
 $dbname = "obtms";    // your database name
 
 $conn = new mysqli($servername, $usernameDB, $passwordDB, $dbname);

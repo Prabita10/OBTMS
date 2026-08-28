@@ -3,7 +3,7 @@ session_start();
 
 $servername = "localhost";
 $usernameDB = "root";
-$passwordDB = "root";
+$passwordDB = "";
 $dbname = "obtms";
 $conn = new mysqli($servername, $usernameDB, $passwordDB, $dbname);
 if ($conn->connect_error) {

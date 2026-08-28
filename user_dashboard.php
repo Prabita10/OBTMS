@@ -4,6 +4,18 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
     header("Location: login.html");
     exit();
 }
+
+// Database connection for notifications
+$conn = new mysqli("localhost","root","","obtms");
+if($conn->connect_error) die("Connection failed: ".$conn->connect_error);
+
+$username = $_SESSION['username'];
+
+// Get unread notification count
+$unreadResult = $conn->query("SELECT COUNT(*) as unread FROM notifications WHERE username = '$username' AND is_read = 0");
+$unreadCount = $unreadResult->fetch_assoc()['unread'];
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -13,6 +25,8 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard - OBTMS</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -70,6 +84,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
             flex: 1;
             min-width: 250px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
         .card h3 {
@@ -94,6 +109,76 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
 
         .card a.button:hover {
             background-color: #0056b3;
+        }
+
+        /* ============================================
+           NOTIFICATION INDICATOR - RED DOT
+           ============================================ */
+        .notif-badge {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 22px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+            animation: pulse 2s infinite;
+            display: <?php echo $unreadCount > 0 ? 'block' : 'none'; ?>;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .notif-dot {
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            background: #dc3545;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.6);
+            animation: pulse 2s infinite;
+            display: <?php echo $unreadCount > 0 ? 'block' : 'none'; ?>;
+        }
+
+        /* ============================================
+           NOTIFICATION BELL WITH BADGE (Optional - if you want)
+           ============================================ */
+        .bell-container {
+            display: inline-block;
+            position: relative;
+            margin-left: 15px;
+        }
+        .bell-container .bell-icon {
+            font-size: 20px;
+            color: rgba(255,255,255,0.85);
+            cursor: pointer;
+        }
+        .bell-container .bell-icon:hover {
+            color: #fff;
+        }
+        .bell-container .bell-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 7px;
+            font-size: 11px;
+            font-weight: 700;
+            min-width: 18px;
+            text-align: center;
+            display: <?php echo $unreadCount > 0 ? 'block' : 'none'; ?>;
         }
 
         .logout {
@@ -167,12 +252,18 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
     <header>
         <h1>BusGo</h1>
         <nav>
+            <!-- Optional: Bell icon with badge in header -->
+            <span class="bell-container">
+                <a href="notifications.php" style="color:white; text-decoration:none;">
+                    <i class="fas fa-bell bell-icon"></i>
+                    <span class="bell-badge"><?php echo $unreadCount > 0 ? $unreadCount : ''; ?></span>
+                </a>
+            </span>
             <a href="logout.php">Logout</a>
         </nav>
     </header>
 
     <div class="container">
-        <!-- <div class="welcome">Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</div> -->
         <!-- Welcome Box -->
         <div class="welcome-box">
             <div>
@@ -184,7 +275,6 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
             <div class="user-badge"><i class="fas fa-user-circle"></i> <?php echo ucfirst($_SESSION['role']); ?></div>
         </div>
 
-
         <div class="dashboard-grid">
 
             <div class="card">
@@ -192,6 +282,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
                 <p>Find buses and book tickets for your next journey.</p>
                 <a href="search_buses.php" class="button">Search Buses</a>
             </div>
+
             <div class="card">
                 <h3>View Bookings</h3>
                 <p>View all your upcoming bus trips.</p>
@@ -203,15 +294,63 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
                 <p>Update your personal information and preferences.</p>
                 <a href="edit_account.php" class="button">Edit Account</a>
             </div>
+
+            <!-- ============================================
+            NOTIFICATION CARD WITH RED DOT
+            ============================================ -->
             <div class="card">
-                <h3>Notifications</h3>
+                <!-- RED DOT INDICATOR -->
+                <span class="notif-dot" id="notifDot"></span>
+
+                <h3><i class="fas fa-bell"></i> Notifications</h3>
                 <p>Check alerts for upcoming trips and booking updates.</p>
-                <a href="#" class="button">View Alerts</a>
+                <a href="notifications.php" class="button" id="notifBtn">
+                    <i class="fas fa-arrow-right"></i> View Alerts
+                </a>
             </div>
+
         </div>
 
         <a class="logout" href="logout.php"></a>
     </div>
+
+    <script>
+        // ============================================
+        // CHECK FOR NEW NOTIFICATIONS EVERY 30 SECONDS
+        // ============================================
+        function checkNotifications() {
+            fetch('notifications/get_notifications.php')
+                .then(response => response.json())
+                .then(data => {
+                    const dot = document.getElementById('notifDot');
+                    const badge = document.querySelector('.bell-badge');
+                    
+                    if (data.success && data.unread_count > 0) {
+                        // Show red dot
+                        dot.style.display = 'block';
+                        if (badge) {
+                            badge.textContent = data.unread_count;
+                            badge.style.display = 'block';
+                        }
+                    } else {
+                        // Hide red dot
+                        dot.style.display = 'none';
+                        if (badge) {
+                            badge.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(() => {
+                    // If error, keep dot hidden
+                });
+        }
+
+        // Check every 30 seconds
+        setInterval(checkNotifications, 30000);
+
+        // Check on page load
+        document.addEventListener('DOMContentLoaded', checkNotifications);
+    </script>
 
 </body>
 

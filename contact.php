@@ -21,12 +21,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $subject = isset($_POST['subject']) ? htmlspecialchars($_POST['subject']) : '';
     $message = isset($_POST['message']) ? htmlspecialchars($_POST['message']) : '';
 
+    // Validation
     if (empty($fullname) || empty($email) || empty($subject) || empty($message)) {
         $error = true;
         $errorMessage = 'Please fill in all required fields.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    } 
+    // Full Name Validation: at least 3 characters (letters and spaces only)
+    elseif (strlen($fullname) < 3) {
         $error = true;
-        $errorMessage = 'Please enter a valid email address.';
+        $errorMessage = 'Full name must be at least 3 characters.';
+    } elseif (!preg_match('/^[A-Za-z\s]+$/', $fullname)) {
+        $error = true;
+        $errorMessage = 'Full name can only contain letters and spaces.';
+    }
+    // Email Validation: must end with @gmail.com, @hotmail.com, @outlook.com, @icloud.com, or @yahoo.com
+    elseif (!preg_match('/^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|outlook\.com|icloud\.com|yahoo\.com)$/', $email)) {
+        $error = true;
+        $errorMessage = 'Email must end with @gmail.com, @hotmail.com, @outlook.com, @icloud.com, or @yahoo.com';
+    }
+    // Phone Validation: 10 digits starting with 9
+    elseif (!empty($phone) && !preg_match('/^9[0-9]{9}$/', $phone)) {
+        $error = true;
+        $errorMessage = 'Phone number must be 10 digits starting with 9 (e.g., 98XXXXXXXX).';
     } else {
         $mail = new PHPMailer(true);
 
@@ -35,11 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'prabitaadhikari792@gmail.com';     //  GMAIL
-            $mail->Password = 'sshe orxf nxee etgp';        //  GMAIL APP PASSWORD
+            $mail->Username = 'prabitaadhikari792@gmail.com';
+            $mail->Password = 'sshe orxf nxee etgp';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
-            $mail->SMTPDebug = 0; // Set to 2 for debugging
+            $mail->SMTPDebug = 0;
 
             // Recipients
             $mail->setFrom($email, $fullname);
@@ -559,7 +575,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
                     <input type="tel" id="phone" name="phone" 
-                        value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
+                        value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>"
+                        placeholder="98XXXXXXXX">
                 </div>
 
                 <div class="form-group">

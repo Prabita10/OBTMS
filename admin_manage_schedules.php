@@ -7,7 +7,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
 
 $servername="localhost";
 $usernameDB="root";
-$passwordDB="root";
+$passwordDB="";
 $dbname="obtms";
 
 $conn = new mysqli($servername,$usernameDB,$passwordDB,$dbname);
@@ -127,8 +127,22 @@ tr:hover{background:#f8faff}
                 <?php if($result->num_rows > 0): ?>
                     <?php while($row = $result->fetch_assoc()): 
                         $available_seats = $row['total_seats'] - $row['booked_seats'];
-                        $status_class = $available_seats > 10 ? 'available' : ($available_seats > 0 ? 'limited' : 'full');
-                        $status_text = $available_seats > 10 ? 'Available' : ($available_seats > 0 ? 'Limited' : 'Full');
+                        
+                        // ============================================
+                        // UPDATED STATUS LOGIC - Percentage Based
+                        // ============================================
+                        $percentage = ($available_seats / $row['total_seats']) * 100;
+                        
+                        if ($percentage > 30) {
+                            $status_class = 'available';
+                            $status_text = 'Available';
+                        } elseif ($percentage > 0) {
+                            $status_class = 'limited';
+                            $status_text = 'Limited';
+                        } else {
+                            $status_class = 'full';
+                            $status_text = 'Full';
+                        }
                     ?>
                     <tr>
                         <td>#<?php echo $row['schedule_id']; ?></td>

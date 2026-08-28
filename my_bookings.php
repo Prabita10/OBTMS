@@ -8,7 +8,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
 $username = $_SESSION['username'];
 $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
 
-$conn = new mysqli("localhost", "root", "root", "obtms");
+$conn = new mysqli("localhost", "root", "", "obtms");
 if ($conn->connect_error)
     die("Connection failed: " . $conn->connect_error);
 

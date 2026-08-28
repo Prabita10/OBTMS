@@ -7,7 +7,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
 
 $servername = "localhost";
 $usernameDB = "root";
-$passwordDB = "root";
+$passwordDB = "";
 $dbname = "obtms";
 $conn = new mysqli($servername, $usernameDB, $passwordDB, $dbname);
 if ($conn->connect_error) {
@@ -17,7 +17,7 @@ if ($conn->connect_error) {
 $username = $_SESSION['username'];
 $schedule_id = isset($_GET['schedule_id']) ? intval($_GET['schedule_id']) : 0;
 
-// Fetch schedule info - updated without available_seats
+// Fetch schedule info
 $sql = "SELECT s.schedule_id, 
                b.bus_name, 
                b.bus_number,
@@ -43,63 +43,105 @@ $schedule = $schedule_res->fetch_assoc();
 // Calculate available seats
 $available_seats = $schedule['total_seats'] - $schedule['booked_seats'];
 
-// Fetch already booked seats
+// Fetch already booked seats (for display only)
 $booked = [];
 $booked_res = $conn->query("SELECT seat_number FROM bookings WHERE schedule_id=$schedule_id AND status != 'canceled'");
 while ($row = $booked_res->fetch_assoc()) {
     $booked[] = $row['seat_number'];
 }
 
-// Handle booking submission
+// ============================================
+// HANDLE BOOKING WITH UNIQUE CONSTRAINT
+// ============================================
 $msg = "";
+$errorSeats = [];
+
 if (isset($_POST['book'])) {
     $seat_numbers = explode(',', $_POST['seat_number']);
     $seat_numbers = array_map('trim', $seat_numbers);
     $success_count = 0;
     $selectedSeats = [];
 
-    foreach ($seat_numbers as $seat_number) {
-        $seat_number = intval($seat_number);
-        if (in_array($seat_number, $booked)) {
-            $msg .= "Seat $seat_number is already booked. ";
-        } elseif ($seat_number < 1 || $seat_number > $schedule['total_seats']) {
-            $msg .= "Seat $seat_number is invalid. ";
-        } else {
-            $conn->query("INSERT INTO bookings(username, schedule_id, seat_number, status) 
-                          VALUES ('$username', $schedule_id, '$seat_number', 'confirmed')");
-            $booked[] = $seat_number;
-            $success_count++;
-            $selectedSeats[] = $seat_number;
+    // Begin transaction
+    $conn->begin_transaction();
+
+    try {
+        foreach ($seat_numbers as $seat_number) {
+            $seat_number = intval($seat_number);
+
+            // Validate seat number range
+            if ($seat_number < 1 || $seat_number > $schedule['total_seats']) {
+                $msg .= "Seat $seat_number is invalid. ";
+                continue;
+            }
+
+            // ============================================
+            // BOOK THE SEAT WITH DUPLICATE CHECK
+            // ============================================
+            $insert = "INSERT INTO bookings(username, schedule_id, seat_number, status) 
+                       VALUES ('$username', $schedule_id, '$seat_number', 'confirmed')";
+            
+            if (!$conn->query($insert)) {
+                // Check for duplicate entry error (MySQL error code 1062)
+                if ($conn->errno == 1062) {
+                    // Duplicate seat - already booked by someone else
+                    $errorSeats[] = $seat_number;
+                } else {
+                    throw new Exception($conn->error);
+                }
+            } else {
+                // Successfully booked
+                $success_count++;
+                $selectedSeats[] = $seat_number;
+            }
         }
-    }
 
-    if ($success_count > 0) {
-        // Update available seats is no longer needed since we calculate dynamically
-        // But we'll update booked_seats count by inserting into bookings table
+        if (!empty($errorSeats)) {
+            $msg = "Seat(s) " . implode(', ', $errorSeats) . " were already booked by someone else. ";
+        }
 
-        $_SESSION['invoice'] = [
-            'username' => $username,
-            'booking_time' => date("Y-m-d H:i:s"),
-            'bus_name' => $schedule['bus_name'],
-            'bus_number' => $schedule['bus_number'],
-            'route' => $schedule['source'] . " → " . $schedule['destination'],
-            'departure' => $schedule['departure_time'],
-            'arrival' => $schedule['arrival_time'],
-            'seat_price' => $schedule['fare'],
-            'seats' => implode(',', $selectedSeats),
-            'schedule_id' => $schedule['schedule_id'],
-            'total_seats' => $schedule['total_seats']
-        ];
+        if ($success_count > 0) {
+            // Commit transaction
+            $conn->commit();
 
-        header("Location: ticket_invoice.php");
-        exit();
+            // Add notification for booking
+            $notifMessage = "🎫 Your ticket has been booked successfully! Bus: " . $schedule['bus_name'] . " | Route: " . $schedule['source'] . " → " . $schedule['destination'] . " | Seat: " . implode(',', $selectedSeats);
+            $conn->query("INSERT INTO notifications (username, message) VALUES ('$username', '$notifMessage')");
+
+            $_SESSION['invoice'] = [
+                'username' => $username,
+                'booking_time' => date("Y-m-d H:i:s"),
+                'bus_name' => $schedule['bus_name'],
+                'bus_number' => $schedule['bus_number'],
+                'route' => $schedule['source'] . " → " . $schedule['destination'],
+                'departure' => $schedule['departure_time'],
+                'arrival' => $schedule['arrival_time'],
+                'seat_price' => $schedule['fare'],
+                'seats' => implode(',', $selectedSeats),
+                'schedule_id' => $schedule['schedule_id'],
+                'total_seats' => $schedule['total_seats']
+            ];
+
+            header("Location: ticket_invoice.php?booking=success");
+            exit();
+        } else {
+            // No seats were booked - rollback
+            $conn->rollback();
+            if (empty($msg)) {
+                $msg = "No seats could be booked. They may have been taken by someone else.";
+            }
+        }
+
+    } catch (Exception $e) {
+        $conn->rollback();
+        $msg = "Booking failed. Please try again.";
     }
 }
 $conn->close();
 
 // Create realistic bus layout (2 seats left, aisle, 2 seats right)
 $total_seats = $schedule['total_seats'];
-$seats_per_row = 4; // 2 left + 2 right
+$seats_per_row = 4;
 $rows = ceil($total_seats / $seats_per_row);
 $seat_map = [];
 $seat_num = 1;
@@ -177,7 +219,6 @@ for ($r = 0; $r < $rows; $r++) {
             margin-right: 8px
         }
 
-        /* Real Bus Layout */
         .bus-wrapper {
             background: #f0f4fb;
             border-radius: 14px;
@@ -188,9 +229,7 @@ for ($r = 0; $r < $rows; $r++) {
         }
 
         .bus-wrapper::before {
-            content: '🚌 ' .
-                <?php echo $schedule['bus_number']; ?>
-            ;
+            content: '🚌 <?php echo htmlspecialchars($schedule['bus_number']); ?>';
             position: absolute;
             top: -16px;
             left: 50%;
@@ -210,7 +249,6 @@ for ($r = 0; $r < $rows; $r++) {
             gap: 8px
         }
 
-        /* Each row */
         .bus-row {
             display: flex;
             gap: 10px;
@@ -218,7 +256,6 @@ for ($r = 0; $r < $rows; $r++) {
             align-items: center
         }
 
-        /* Left seats (2) */
         .seat-group-left {
             display: flex;
             gap: 10px;
@@ -226,7 +263,6 @@ for ($r = 0; $r < $rows; $r++) {
             justify-content: flex-end
         }
 
-        /* Aisle */
         .aisle {
             width: 30px;
             min-height: 40px;
@@ -241,7 +277,6 @@ for ($r = 0; $r < $rows; $r++) {
             flex-shrink: 0
         }
 
-        /* Right seats (2) */
         .seat-group-right {
             display: flex;
             gap: 10px;
@@ -249,7 +284,6 @@ for ($r = 0; $r < $rows; $r++) {
             justify-content: flex-start
         }
 
-        /* Individual Seat */
         .seat {
             width: 55px;
             height: 55px;
@@ -311,12 +345,10 @@ for ($r = 0; $r < $rows; $r++) {
             color: #1a2b4c
         }
 
-        /* Empty seat placeholder */
         .seat.empty {
             visibility: hidden
         }
 
-        /* Legend */
         .legend {
             display: flex;
             justify-content: center;
@@ -351,7 +383,6 @@ for ($r = 0; $r < $rows; $r++) {
             background: #ffc107
         }
 
-        /* Booking Info */
         .booking-info {
             background: #f8fafc;
             padding: 15px 20px;
@@ -382,7 +413,6 @@ for ($r = 0; $r < $rows; $r++) {
             font-size: 16px
         }
 
-        /* Buttons */
         .btn-group {
             display: flex;
             gap: 15px;
@@ -459,7 +489,6 @@ for ($r = 0; $r < $rows; $r++) {
             font-weight: 500
         }
 
-        /* Responsive */
         @media(max-width:600px) {
             .container {
                 padding: 15px
@@ -513,12 +542,10 @@ for ($r = 0; $r < $rows; $r++) {
         <?php if ($msg != "")
             echo "<div class='msg'><i class='fas fa-check-circle'></i> $msg</div>"; ?>
 
-        <!-- Real Bus Visualization -->
         <div class="bus-wrapper">
             <div class="bus-body">
                 <?php foreach ($seat_map as $row_index => $row_seats): ?>
                     <div class="bus-row">
-                        <!-- Left side seats (2) -->
                         <div class="seat-group-left">
                             <?php
                             $left_seats = array_slice($row_seats, 0, 2);
@@ -535,10 +562,8 @@ for ($r = 0; $r < $rows; $r++) {
                                 <?php endif; endforeach; ?>
                         </div>
 
-                        <!-- Aisle -->
                         <div class="aisle">⬇</div>
 
-                        <!-- Right side seats (2) -->
                         <div class="seat-group-right">
                             <?php
                             $right_seats = array_slice($row_seats, 2, 2);
@@ -559,14 +584,12 @@ for ($r = 0; $r < $rows; $r++) {
             </div>
         </div>
 
-        <!-- Legend -->
         <div class="legend">
             <div class="legend-item"><span class="box available"></span> Available</div>
             <div class="legend-item"><span class="box selected"></span> Selected</div>
             <div class="legend-item"><span class="box booked"></span> Booked</div>
         </div>
 
-        <!-- Booking Info -->
         <div class="booking-info">
             <div class="info-item"><i class="fas fa-chair"></i> <span id="selectedCount">0</span> seat(s) selected</div>
             <div class="info-item"><i class="fas fa-money-bill-wave"></i> Fare: <strong>NPR
@@ -575,7 +598,6 @@ for ($r = 0; $r < $rows; $r++) {
                 <strong><?php echo $available_seats; ?></strong> seats</div>
         </div>
 
-        <!-- Booking Form -->
         <form method="POST" id="bookingForm">
             <input type="hidden" name="seat_number" id="seat_number" required>
 
@@ -635,8 +657,7 @@ for ($r = 0; $r < $rows; $r++) {
             updateSelection();
         }
 
-        // Prevent form submission if no seats selected
-        document.getElementById('bookingForm').addEventListener('submit', function (e) {
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
             if (selectedSeats.length === 0) {
                 e.preventDefault();
                 alert('Please select at least one seat.');

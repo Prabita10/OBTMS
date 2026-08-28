@@ -22,7 +22,7 @@ $totalPrice = $invoice['seat_price'] * count($seats);
 $otherBookedSeats = [];
 $servername = "localhost";
 $usernameDB = "root";
-$passwordDB = "root";
+$passwordDB = "";
 $dbname = "obtms";
 $conn = new mysqli($servername, $usernameDB, $passwordDB, $dbname);
 if ($conn->connect_error) {

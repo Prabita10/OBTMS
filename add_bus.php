@@ -7,7 +7,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
 
 $servername="localhost";
 $usernameDB="root";
-$passwordDB="root";
+$passwordDB="";
 $dbname="obtms";
 $conn = new mysqli($servername,$usernameDB,$passwordDB,$dbname);
 if($conn->connect_error){ die("Connection failed: ".$conn->connect_error); }
@@ -22,12 +22,17 @@ if(isset($_POST['submit'])){
     $total_seats = (int)$_POST['total_seats'];
     $status = mysqli_real_escape_string($conn, $_POST['status']);
 
-    // Validate seats are not negative
+    // ============================================
+    // VALIDATION: Bus Number must start with BUS- followed by up to 5 digits
+    // ============================================
     if(empty($bus_number)){
         $msg = "Bus number is required!";
         $msgType = "error";
-    } elseif($total_seats <= 0){
-        $msg = "Total seats must be at least 1!";
+    } elseif(!preg_match('/^BUS-[0-9]{1,5}$/', $bus_number)){
+        $msg = "Bus number must start with 'BUS-' followed by 1 to 5 digits (e.g., BUS-001, BUS-99999)!";
+        $msgType = "error";
+    } elseif($total_seats < 15){
+        $msg = "Total seats must be at least 15!";
         $msgType = "error";
     } else {
         // Check if bus_number already exists
@@ -124,6 +129,8 @@ header nav a.logout:hover{background:#c82333}
 
 .hint{font-size:11px;color:#6b7a8f;margin-top:4px}
 .hint i{margin-right:4px}
+.hint.valid{color:#28a745}
+.hint.invalid{color:#dc3545}
 
 .btn-submit{width:100%;padding:12px;background:#1a2b4c;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:5px}
 .btn-submit:hover{background:#2a4a7a;transform:scale(1.01);box-shadow:0 4px 12px rgba(26,43,76,0.3)}
@@ -164,14 +171,14 @@ header nav a.logout:hover{background:#c82333}
             </div>
         <?php endif; ?>
 
-        <form method="POST">
+        <form method="POST" id="addBusForm">
             <div class="form-group">
                 <label><i class="fas fa-hashtag"></i> Bus Number <span class="required">*</span></label>
                 <div class="input-wrapper">
                     <i class="fas fa-hashtag icon-left"></i>
-                    <input type="text" name="bus_number" placeholder="e.g., BUS-001" required>
+                    <input type="text" name="bus_number" id="busNumber" placeholder="e.g., BUS-001" required>
                 </div>
-                <div class="hint"><i class="fas fa-info-circle"></i> Unique bus identifier (e.g., BUS-001, BUS-002)</div>
+                <div class="hint" id="busNumberHint"><i class="fas fa-info-circle"></i> Format: BUS-001 to BUS-99999 (1-5 digits)</div>
             </div>
 
             <div class="form-group">
@@ -199,9 +206,13 @@ header nav a.logout:hover{background:#c82333}
                 <label><i class="fas fa-users"></i> Total Seats <span class="required">*</span></label>
                 <div class="input-wrapper">
                     <i class="fas fa-users icon-left"></i>
-                    <input type="number" name="total_seats" placeholder="Total number of seats" min="1" required>
+                    <select name="total_seats" required>
+                        <?php for($i = 15; $i <= 60; $i++): ?>
+                            <option value="<?php echo $i; ?>"><?php echo $i; ?> seats</option>
+                        <?php endfor; ?>
+                    </select>
                 </div>
-                <div class="hint"><i class="fas fa-info-circle"></i> Minimum 1 seat required</div>
+                <div class="hint"><i class="fas fa-info-circle"></i> Minimum 15 seats required</div>
             </div>
 
             <div class="form-group">
@@ -227,6 +238,48 @@ header nav a.logout:hover{background:#c82333}
         </a>
     </div>
 </div>
+
+<script>
+// ============================================
+// REAL-TIME VALIDATION FOR BUS NUMBER
+// ============================================
+document.getElementById('busNumber').addEventListener('input', function() {
+    const value = this.value;
+    const hint = document.getElementById('busNumberHint');
+    const pattern = /^BUS-[0-9]{1,5}$/;
+    
+    if (value.length === 0) {
+        hint.className = 'hint';
+        hint.innerHTML = '<i class="fas fa-info-circle"></i> Format: BUS-001 to BUS-99999 (1-5 digits)';
+        this.className = '';
+    } else if (pattern.test(value)) {
+        hint.className = 'hint valid';
+        hint.innerHTML = '<i class="fas fa-check-circle"></i> Valid bus number format!';
+        this.className = 'success';
+    } else {
+        hint.className = 'hint invalid';
+        hint.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid! Must start with BUS- followed by 1-5 digits';
+        this.className = 'error';
+    }
+});
+
+// ============================================
+// FORM SUBMISSION VALIDATION
+// ============================================
+document.getElementById('addBusForm').addEventListener('submit', function(e) {
+    const busNumber = document.getElementById('busNumber').value.trim();
+    const pattern = /^BUS-[0-9]{1,5}$/;
+    
+    if (!pattern.test(busNumber)) {
+        e.preventDefault();
+        alert('❌ Bus number must start with "BUS-" followed by 1 to 5 digits (e.g., BUS-001, BUS-99999)!');
+        document.getElementById('busNumber').focus();
+        return false;
+    }
+    
+    return true;
+});
+</script>
 
 </body>
 </html>
